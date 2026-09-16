@@ -4,6 +4,49 @@ const trigger = document.querySelector('#profileTrigger');
 const form = document.querySelector('#profileForm');
 const status = document.querySelector('#profileStatus');
 
+const kazakhstanCities = ['Абай','Аксай','Акколь','Аксу','Актау','Актобе','Алатау','Алга','Алматы','Алтай','Арал','Аркалык','Арыс','Астана','Атбасар','Атырау','Аягоз','Байконур','Балхаш','Булаево','Державинск','Ерейментау','Есик','Есиль','Жанаозен','Жанатас','Жаркент','Жезказган','Жем','Жетысай','Житикара','Зайсан','Казалинск','Кандыагаш','Караганда','Каражал','Каратау','Каркаралинск','Каскелен','Кентау','Кокшетау','Конаев','Костанай','Косшы','Кульсары','Курчатов','Кызылорда','Ленгер','Лисаковск','Макинск','Мамлютка','Павлодар','Петропавловск','Приозерск','Риддер','Рудный','Сарань','Сарканд','Сарыагаш','Сатпаев','Семей','Сергеевка','Серебрянск','Степногорск','Степняк','Тайынша','Талгар','Талдыкорган','Тараз','Текели','Темир','Темиртау','Тобыл','Туркестан','Уральск','Усть-Каменогорск','Ушарал','Уштобе','Форт-Шевченко','Хромтау','Шалкар','Шар','Шардара','Шахтинск','Шемонаиха','Шу','Шымкент','Щучинск','Экибастуз','Эмба'];
+const universitiesByCity = {
+  'Туркестан': ['Международный казахско-турецкий университет им. Х. А. Ясави', 'Международный университет туризма и гостеприимства', 'Другой вуз Туркестана'],
+  'Алматы': ['КазНУ им. аль-Фараби', 'Satbayev University', 'Международный университет информационных технологий', 'КБТУ'],
+  'Астана': ['Astana IT University', 'ЕНУ им. Л. Н. Гумилёва', 'Nazarbayev University', 'Казахский агротехнический исследовательский университет'],
+  'Шымкент': ['Южно-Казахстанский университет им. М. Ауэзова', 'Южно-Казахстанский педагогический университет', 'Университет «Мирас»'],
+  'Караганда': ['Карагандинский университет им. Е. А. Букетова', 'Карагандинский технический университет', 'Медицинский университет Караганды'],
+  'Павлодар': ['Торайгыров университет'],
+  'Костанай': ['Костанайский региональный университет им. А. Байтурсынова'],
+  'Кызылорда': ['Кызылординский университет им. Коркыт Ата'],
+  'Тараз': ['Таразский региональный университет им. М. Х. Дулати'],
+  'Усть-Каменогорск': ['Восточно-Казахстанский технический университет им. Д. Серикбаева', 'Восточно-Казахстанский университет им. С. Аманжолова'],
+  'Семей': ['Университет им. Шакарима'],
+  'Актобе': ['Актюбинский региональный университет им. К. Жубанова', 'Западно-Казахстанский медицинский университет им. М. Оспанова'],
+  'Атырау': ['Атырауский университет нефти и газа им. С. Утебаева'],
+  'Актау': ['Каспийский университет технологий и инжиниринга им. Ш. Есенова'],
+  'Уральск': ['Западно-Казахстанский университет им. М. Утемисова'],
+  'Кокшетау': ['Кокшетауский университет им. Ш. Уалиханова'],
+  'Талдыкорган': ['Жетысуский университет им. И. Жансугурова'],
+  'Петропавловск': ['Северо-Казахстанский университет им. М. Козыбаева'],
+  'Жезказган': ['Жезказганский университет им. О. А. Байконурова']
+};
+
+function fillUniversities(citySelect, universitySelect, preferred) {
+  const universities = universitiesByCity[citySelect.value] || ['Выберите университет', 'Другой университет'];
+  universitySelect.innerHTML = universities.map(name => `<option value="${name}">${name}</option>`).join('');
+  if (preferred && universities.includes(preferred)) universitySelect.value = preferred;
+}
+
+function configureLocationSelectors() {
+  const savedCity = document.querySelector('#city').value;
+  const savedProfileCity = document.querySelector('#profileCity').value;
+  [document.querySelector('#city'), document.querySelector('#profileCity')].forEach(select => {
+    select.innerHTML = kazakhstanCities.map(city => `<option value="${city}">${city}</option>`).join('');
+  });
+  setSelectValue('#city', savedCity);
+  setSelectValue('#profileCity', savedProfileCity);
+  fillUniversities(document.querySelector('#city'), document.querySelector('#university'));
+  fillUniversities(document.querySelector('#profileCity'), document.querySelector('#profileUniversity'));
+  document.querySelector('#city').addEventListener('change', event => fillUniversities(event.currentTarget, document.querySelector('#university')));
+  document.querySelector('#profileCity').addEventListener('change', event => fillUniversities(event.currentTarget, document.querySelector('#profileUniversity')));
+}
+
 function setSelectValue(selector, value) {
   const select = document.querySelector(selector);
   if ([...select.options].some(option => option.value === value)) select.value = value;
@@ -33,6 +76,7 @@ function applyProfile(profile) {
 function openProfile() { dialog.hidden = false; document.body.style.overflow = 'hidden'; document.querySelector('#profileName').focus(); }
 function closeProfile() { dialog.hidden = true; document.body.style.overflow = ''; }
 
+configureLocationSelectors();
 trigger.addEventListener('click', openProfile);
 dialog.querySelectorAll('[data-close-profile]').forEach(button => button.addEventListener('click', closeProfile));
 document.addEventListener('keydown', event => { if (event.key === 'Escape' && !dialog.hidden) closeProfile(); });
