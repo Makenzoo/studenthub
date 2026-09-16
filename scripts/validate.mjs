@@ -5,6 +5,15 @@ assert.equal(typeof worker.fetch, "function");
 const response = await worker.fetch(new Request("https://studenthub.test/"), {});
 assert.equal(response.status, 200);
 assert.match(await response.text(), /StudentHub KZ/);
+const legacyAsset = await worker.fetch(new Request("https://studenthub.test/"), {
+  ASSETS: {
+    async fetch(request) {
+      assert.equal(new URL(request.url).pathname, "/index.html");
+      return new Response("legacy-home", { headers: { "content-type": "text/html" } });
+    },
+  },
+});
+assert.equal(await legacyAsset.text(), "legacy-home");
 const db = {
   prepare() {
     return {
