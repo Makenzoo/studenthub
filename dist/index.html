@@ -110,6 +110,21 @@
       </form>
     </section>
   </div>
+  <div class="profile-dialog" id="feedFilterDialog" role="dialog" aria-modal="true" aria-labelledby="feedFilterTitle" hidden>
+    <div class="profile-backdrop" data-close-feed-filter></div>
+    <section class="profile-panel filter-panel">
+      <button class="dialog-close" type="button" data-close-feed-filter aria-label="Закрыть">×</button>
+      <div class="profile-panel-head"><div class="profile-large-avatar">☷</div><div><p class="section-label">ПОДБОРКИ</p><h2 id="feedFilterTitle">Фильтры возможностей</h2><p>Настройте список под свою задачу.</p></div></div>
+      <form id="feedFilterForm">
+        <div class="profile-fields filter-fields">
+          <label class="wide">Раздел<select id="feedFilterType" name="type"><option value="jobs">Вакансии и стажировки</option><option value="events">Мероприятия</option><option value="grants">Гранты</option><option value="housing">Жильё</option></select></label>
+          <label class="wide">Поиск<input id="feedFilterSearch" name="search" type="search" maxlength="80" placeholder="Например: IT, хакатон, стипендия"></label>
+        </div>
+        <div class="filter-actions"><button class="secondary" id="resetFeedFilters" type="button">Сбросить</button><button class="primary" type="submit">Показать <span>→</span></button></div>
+        <p class="filter-help" id="feedFilterStatus" aria-live="polite">Фильтры применяются только к карточкам на этой странице.</p>
+      </form>
+    </section>
+  </div>
   <button class="ai-trigger" id="aiAssistantTrigger" type="button" aria-haspopup="dialog"><span aria-hidden="true">✦</span><span>AI Ассистент</span></button>
   <div class="profile-dialog" id="aiAssistantDialog" role="dialog" aria-modal="true" aria-labelledby="aiAssistantTitle" hidden>
     <div class="profile-backdrop" data-close-ai></div>
