@@ -1,0 +1,10 @@
+.source-note {
+  margin: -12px 0 19px;
+  color: #9995ab;
+  font-size: 12px;
+}
+
+.listing:hover {
+  border-color: rgba(164, 139, 255, .62);
+  transform: translateY(-3px);
+}
