@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="StudentHub KZ — единая студенческая платформа Казахстана.">
+  <title>StudentHub KZ — всё для студенческой жизни</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath fill='%239d7cff' d='M4 24 32 10l28 14-28 14L4 24Z'/%3E%3Cpath fill='%2349d7ff' d='M14 31v12c0 7 36 7 36 0V31L32 40 14 31Z'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="orb orb-a"></div><div class="orb orb-b"></div><div class="grid-glow"></div>
+  <header class="topbar">
+    <a class="brand" href="#top" aria-label="StudentHub KZ"><span class="brand-mark">S</span><span>StudentHub <b>KZ</b></span></a>
+    <nav aria-label="Основная навигация"><a href="#opportunities" data-i18n="navOpportunities">Возможности</a><a href="#feed" data-i18n="navFeed">Подборки</a><a href="#community" data-i18n="navCommunity">Сообщество</a></nav>
+    <div class="top-actions"><button class="lang-toggle" type="button" aria-label="Switch language">KZ</button><button class="profile" type="button"><span class="avatar">Д</span><span data-i18n="profile">Мой профиль</span></button></div>
+  </header>
+
+  <main id="top">
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <p class="eyebrow"><span></span><span data-i18n="eyebrow">Платформа для студентов Казахстана</span></p>
+        <h1 id="hero-title" data-i18n="title">Всё для студенческой жизни — <em>в одном месте.</em></h1>
+        <p class="hero-text" data-i18n="intro">Учёба, первая работа, жильё, гранты и события — находите то, что подходит именно вам.</p>
+        <div class="hero-actions"><a href="#finder" class="primary" data-i18n="find">Найти для себя <span>→</span></a><button class="play" type="button"><i>▶</i><span data-i18n="howItWorks">Как это работает</span></button></div>
+        <div class="people"><div class="faces"><span>А</span><span>Н</span><span>М</span><span>+</span></div><p><strong>24 800+</strong> <span data-i18n="people">студентов уже на платформе</span></p></div>
+      </div>
+      <div class="hero-visual" aria-label="Панель возможностей StudentHub">
+        <div class="mini-card welcome"><small data-i18n="today">Сегодня для вас</small><strong data-i18n="welcome">Добро пожаловать, Данияр</strong><div class="progress"><span></span></div><small data-i18n="complete">Заполните профиль на 70%</small></div>
+        <div class="mini-card event"><div class="event-icon">✦</div><div><small data-i18n="closest">Ближайшее событие</small><strong data-i18n="eventTitle">HackDay Turkistan</strong><small>21–22 <span data-i18n="sep">сентября</span></small></div></div>
+        <div class="mini-card job"><div class="job-icon">◈</div><div><small data-i18n="newForYou">Новое для вас</small><strong>UI/UX Intern</strong><small>Almaty · 120 000 ₸</small></div><span class="arrow">↗</span></div>
+        <div class="spark spark-one">✦</div><div class="spark spark-two">✧</div>
+      </div>
+    </section>
+
+    <section class="finder" id="finder" aria-labelledby="finder-title">
+      <div class="finder-heading"><p class="section-label" data-i18n="personal">ПЕРСОНАЛЬНАЯ ПОДБОРКА</p><h2 id="finder-title" data-i18n="finderTitle">Соберите свой StudentHub</h2></div>
+      <div class="filters">
+        <label><span data-i18n="cityLabel">Город</span><select id="city"><option>Туркестан</option><option>Алматы</option><option>Астана</option><option>Шымкент</option></select></label>
+        <label><span data-i18n="universityLabel">Университет</span><select id="university"><option>МУИТ</option><option>КазНУ им. аль-Фараби</option><option>Международный казахско-турецкий университет</option><option>Astana IT University</option></select></label>
+        <label><span data-i18n="specialtyLabel">Направление</span><select id="specialty"><option>IT и технологии</option><option>Бизнес и экономика</option><option>Дизайн</option><option>Педагогика</option></select></label>
+        <button id="applyFilters" class="primary" type="button" data-i18n="show">Показать</button>
+      </div>
+      <p class="filter-result" id="filterResult" aria-live="polite">Подбираем возможности для студентов IT и технологий в Туркестане</p>
+    </section>
+
+    <section class="opportunities" id="opportunities" aria-labelledby="opportunities-title">
+      <div class="section-head"><div><p class="section-label" data-i18n="everything">ВСЁ НУЖНОЕ</p><h2 id="opportunities-title" data-i18n="opportunitiesTitle">Выбирайте свой путь</h2></div><a href="#feed" data-i18n="allSections">Все разделы <span>→</span></a></div>
+      <div class="feature-grid">
+        <article class="feature-card violet"><div class="icon">🎓</div><h3 data-i18n="study">Учёба</h3><p data-i18n="studyText">Конспекты, курсы, материалы и репетиторы.</p><span>1 240 <span data-i18n="materials">материалов</span></span></article>
+        <article class="feature-card blue"><div class="icon">💼</div><h3 data-i18n="jobs">Работа</h3><p data-i18n="jobsText">Вакансии и стажировки для первого опыта.</p><span>86 <span data-i18n="vacancies">вакансий</span></span></article>
+        <article class="feature-card pink"><div class="icon">⌂</div><h3 data-i18n="housing">Жильё</h3><p data-i18n="housingText">Общежития, комнаты и поиск соседа.</p><span>54 <span data-i18n="listings">объявления</span></span></article>
+        <article class="feature-card orange"><div class="icon">✦</div><h3 data-i18n="events">Мероприятия</h3><p data-i18n="eventsText">Хакатоны, олимпиады и конференции.</p><span>28 <span data-i18n="thisMonth">в этом месяце</span></span></article>
+        <article class="feature-card green"><div class="icon">₸</div><h3 data-i18n="grants">Гранты</h3><p data-i18n="grantsText">Стипендии, программы и дедлайны.</p><span>17 <span data-i18n="open">открыты</span></span></article>
+        <article class="feature-card cyan"><div class="icon">↔</div><h3 data-i18n="market">Обмен</h3><p data-i18n="marketText">Книги, техника и вещи от студентов.</p><span>312 <span data-i18n="offers">предложений</span></span></article>
+      </div>
+    </section>
+
+    <section class="feed" id="feed" aria-labelledby="feed-title">
+      <div class="section-head"><div><p class="section-label" data-i18n="now">ПРЯМО СЕЙЧАС</p><h2 id="feed-title" data-i18n="feedTitle">Ваши новые возможности</h2></div><button class="filter-button" type="button">☷ <span data-i18n="filters">Фильтры</span></button></div>
+      <div class="feed-tabs" role="tablist"><button class="active" data-tab="jobs" role="tab" aria-selected="true" data-i18n="tabJobs">Вакансии</button><button data-tab="events" role="tab" aria-selected="false" data-i18n="tabEvents">События</button><button data-tab="grants" role="tab" aria-selected="false" data-i18n="tabGrants">Гранты</button><button data-tab="housing" role="tab" aria-selected="false" data-i18n="tabHousing">Жильё</button></div>
+      <div class="listing-grid" id="listingGrid"></div>
+    </section>
+
+    <section class="community" id="community">
+      <div><p class="section-label" data-i18n="communityLabel">СООБЩЕСТВО</p><h2 data-i18n="communityTitle">Решайте вопросы вместе</h2><p data-i18n="communityText">Задавайте вопросы тем, кто уже прошёл этот путь. Делитесь опытом и находите своих.</p><a href="#top" class="primary" data-i18n="communityAction">Открыть сообщество <span>→</span></a></div>
+      <div class="discussion"><div class="discussion-top"><span class="avatar purple">С</span><div><b>Student Talks</b><small>2 840 участников</small></div><span class="online">● <span data-i18n="online">сейчас онлайн</span></span></div><p data-i18n="question">«Где найти хорошую стажировку после 2 курса?»</p><div class="replies"><span>💬 24 <span data-i18n="answers">ответа</span></span><span>♡ 67</span><span class="latest"><i></i><i></i><i></i> +3 <span data-i18n="newReplies">новых</span></span></div></div>
+    </section>
+  </main>
+  <footer><a class="brand" href="#top"><span class="brand-mark">S</span><span>StudentHub <b>KZ</b></span></a><span>© 2026 StudentHub KZ</span><span data-i18n="footer">Создано для студентов Казахстана</span></footer>
+  <script src="script.js"></script>
+</body>
+</html>
