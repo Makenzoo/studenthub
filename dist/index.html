@@ -110,11 +110,27 @@
       </form>
     </section>
   </div>
+  <button class="ai-trigger" id="aiAssistantTrigger" type="button" aria-haspopup="dialog"><span aria-hidden="true">✦</span><span>AI Ассистент</span></button>
+  <div class="profile-dialog" id="aiAssistantDialog" role="dialog" aria-modal="true" aria-labelledby="aiAssistantTitle" hidden>
+    <div class="profile-backdrop" data-close-ai></div>
+    <section class="ai-panel">
+      <button class="dialog-close" type="button" data-close-ai aria-label="Закрыть">×</button>
+      <header class="ai-head"><div class="ai-avatar" aria-hidden="true">✦</div><div><p class="section-label">STUDENTHUB AI</p><h2 id="aiAssistantTitle">Чем помочь?</h2><p><span class="ai-online">●</span> Онлайн · ответы не сохраняются</p></div></header>
+      <div class="ai-messages" id="aiMessages" role="log" aria-live="polite" aria-label="Диалог с ассистентом">
+        <article class="ai-message ai-message-bot"><b>StudentHub AI</b><p>Помогу найти стажировку, грант, жильё, мероприятие или учебные материалы. С чего начнём?</p></article>
+      </div>
+      <div class="ai-suggestions" aria-label="Быстрые вопросы">
+        <button type="button" data-ai-prompt="Найди стажировку">Стажировка</button><button type="button" data-ai-prompt="Какие есть гранты?">Гранты</button><button type="button" data-ai-prompt="Помоги найти жильё">Жильё</button><button type="button" data-ai-prompt="Ближайшие мероприятия">События</button>
+      </div>
+      <form class="ai-form" id="aiAssistantForm"><label class="sr-only" for="aiAssistantInput">Сообщение для ассистента</label><textarea id="aiAssistantInput" rows="1" maxlength="500" placeholder="Напишите вопрос…"></textarea><button type="submit" aria-label="Отправить сообщение">↑</button></form>
+    </section>
+  </div>
   <footer><a class="brand" href="#top"><span class="brand-mark">S</span><span>StudentHub <b>KZ</b></span></a><span>© 2026 StudentHub KZ</span><span data-i18n="footer">Создано для студентов Казахстана</span></footer>
   <script src="script.js"></script>
   <script src="profile.js"></script>
   <script src="login.js"></script>
   <script src="counter.js"></script>
   <script src="selection.js"></script>
+  <script src="assistant.js"></script>
 </body>
 </html>
