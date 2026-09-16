@@ -1,6 +1,5 @@
 const profileKey = 'studenthub.profile.v1';
 const dialog = document.querySelector('#profileDialog');
-const trigger = document.querySelector('#profileTrigger');
 const form = document.querySelector('#profileForm');
 const status = document.querySelector('#profileStatus');
 
@@ -64,7 +63,6 @@ function applyProfile(profile) {
     input.checked = profile.interests?.includes(input.value) || false;
   });
   const initial = (profile.name || 'Д').trim().charAt(0).toUpperCase() || 'Д';
-  document.querySelector('#profileInitial').textContent = initial;
   document.querySelector('#profileLargeInitial').textContent = initial;
   const greeting = document.querySelector('.welcome strong');
   if (greeting) greeting.textContent = `Добро пожаловать, ${profile.name || 'Данияр'}`;
@@ -78,7 +76,6 @@ function openProfile() { dialog.hidden = false; document.body.style.overflow = '
 function closeProfile() { dialog.hidden = true; document.body.style.overflow = ''; }
 
 configureLocationSelectors();
-trigger.addEventListener('click', openProfile);
 dialog.querySelectorAll('[data-close-profile]').forEach(button => button.addEventListener('click', closeProfile));
 document.addEventListener('keydown', event => { if (event.key === 'Escape' && !dialog.hidden) closeProfile(); });
 

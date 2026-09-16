@@ -14,7 +14,7 @@
   <header class="topbar">
     <a class="brand" href="#top" aria-label="StudentHub KZ"><span class="brand-mark">S</span><span>StudentHub <b>KZ</b></span></a>
     <nav aria-label="Основная навигация"><a href="#opportunities" data-i18n="navOpportunities">Возможности</a><a href="#feed" data-i18n="navFeed">Подборки</a><a href="#community" data-i18n="navCommunity">Сообщество</a></nav>
-    <div class="top-actions"><button class="lang-toggle" type="button" aria-label="Switch language">KZ</button><button class="profile" id="profileTrigger" type="button" aria-haspopup="dialog"><span class="avatar" id="profileInitial">Д</span><span data-i18n="profile">Мой профиль</span></button></div>
+    <div class="top-actions"><button class="lang-toggle" type="button" aria-label="Switch language">KZ</button><button class="profile" id="profileTrigger" type="button" aria-haspopup="dialog"><span class="avatar" id="profileInitial">→</span><span>Войти</span></button></div>
   </header>
 
   <main id="top">
@@ -87,9 +87,24 @@
       </form>
     </section>
   </div>
+  <div class="profile-dialog" id="loginDialog" role="dialog" aria-modal="true" aria-labelledby="loginTitle" hidden>
+    <div class="profile-backdrop" data-close-login></div>
+    <section class="profile-panel login-panel">
+      <button class="dialog-close" type="button" data-close-login aria-label="Закрыть">×</button>
+      <div class="profile-panel-head"><div class="profile-large-avatar">S</div><div><p class="section-label">ЛИЧНЫЙ КАБИНЕТ</p><h2 id="loginTitle">Войти в StudentHub KZ</h2><p>Введите email и пароль, чтобы продолжить.</p></div></div>
+      <form id="loginForm">
+        <div class="profile-fields login-fields">
+          <label class="wide">Email<input id="loginEmail" name="email" type="email" autocomplete="email" placeholder="name@example.com" required></label>
+          <label class="wide">Пароль<input id="loginPassword" name="password" type="password" autocomplete="current-password" placeholder="Введите пароль" required></label>
+        </div>
+        <div class="profile-save"><p id="loginStatus" aria-live="polite">Данные входа не сохраняются на этом этапе.</p><button class="primary" type="submit">Войти <span>→</span></button></div>
+      </form>
+    </section>
+  </div>
   <footer><a class="brand" href="#top"><span class="brand-mark">S</span><span>StudentHub <b>KZ</b></span></a><span>© 2026 StudentHub KZ</span><span data-i18n="footer">Создано для студентов Казахстана</span></footer>
   <script src="script.js"></script>
   <script src="profile.js"></script>
+  <script src="login.js"></script>
   <script src="counter.js"></script>
   <script src="selection.js"></script>
 </body>
