@@ -91,20 +91,22 @@
     <div class="profile-backdrop" data-close-login></div>
     <section class="profile-panel login-panel">
       <button class="dialog-close" type="button" data-close-login aria-label="Закрыть">×</button>
-      <div class="profile-panel-head"><div class="profile-large-avatar">S</div><div><p class="section-label">ЛИЧНЫЙ КАБИНЕТ</p><h2 id="loginTitle">Войти в StudentHub KZ</h2><p>Введите email и пароль, чтобы продолжить.</p></div></div>
+      <div class="profile-panel-head"><div class="profile-large-avatar">S</div><div><p class="section-label">ЛИЧНЫЙ КАБИНЕТ</p><h2 id="loginTitle">Войти в StudentHub KZ</h2><p id="authSubtitle">Введите email и пароль, чтобы продолжить.</p></div></div>
       <form id="loginForm">
         <div class="profile-fields login-fields">
+          <label class="wide registration-only" hidden>Ваше имя<input id="registerName" name="name" type="text" autocomplete="name" placeholder="Как к вам обращаться" disabled required></label>
           <label class="wide">Email<input id="loginEmail" name="email" type="email" autocomplete="email" placeholder="name@example.com" required></label>
-          <label class="wide">Пароль<input id="loginPassword" name="password" type="password" autocomplete="current-password" placeholder="Введите пароль" required></label>
+          <label class="wide">Пароль<input id="loginPassword" name="password" type="password" autocomplete="current-password" placeholder="Введите пароль" minlength="8" required></label>
+          <label class="wide registration-only" hidden>Повторите пароль<input id="registerPasswordConfirm" name="passwordConfirm" type="password" autocomplete="new-password" placeholder="Повторите пароль" disabled required></label>
         </div>
-        <div class="profile-save"><p id="loginStatus" aria-live="polite">Данные входа не сохраняются на этом этапе.</p><button class="primary" type="submit">Войти <span>→</span></button></div>
-        <div class="login-divider"><span>или войдите через</span></div>
+        <div class="profile-save"><p id="loginStatus" aria-live="polite">Данные входа не сохраняются на этом этапе.</p><button class="primary" id="authSubmit" type="submit">Войти <span>→</span></button></div>
+        <div class="login-divider"><span id="socialDividerText">или войдите через</span></div>
         <div class="social-login" aria-label="Вход через социальные сервисы">
           <button type="button" data-login-provider="Apple"><span class="social-symbol apple-symbol" aria-hidden="true">●</span>Apple</button>
           <button type="button" data-login-provider="Google"><span class="social-symbol google-symbol" aria-hidden="true">G</span>Google</button>
           <button type="button" data-login-provider="Microsoft"><span class="social-symbol microsoft-symbol" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Microsoft</button>
         </div>
-        <p class="login-register">Нет аккаунта? <button type="button" data-register>Зарегистрироваться</button></p>
+        <p class="login-register"><span id="authQuestion">Нет аккаунта?</span> <button type="button" data-auth-mode-toggle>Зарегистрироваться</button></p>
       </form>
     </section>
   </div>
