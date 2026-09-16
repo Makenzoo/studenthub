@@ -8,3 +8,17 @@
   border-color: rgba(164, 139, 255, .62);
   transform: translateY(-3px);
 }
+
+.profile-dialog[hidden] { display: none; }
+.profile-dialog { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; padding: 20px; }
+.profile-backdrop { position: absolute; inset: 0; background: rgba(3, 2, 8, .72); backdrop-filter: blur(8px); }
+.profile-panel { position: relative; z-index: 1; width: min(720px, 100%); max-height: calc(100vh - 40px); overflow: auto; border: 1px solid rgba(185, 164, 255, .24); border-radius: 22px; padding: 32px; background: linear-gradient(145deg, #1a162a, #0e0d16); box-shadow: 0 30px 80px rgba(0, 0, 0, .5); }
+.dialog-close { position: absolute; top: 17px; right: 18px; width: 34px; height: 34px; border: 1px solid var(--line); border-radius: 10px; background: #171422; color: #d8d4e8; font-size: 23px; cursor: pointer; }
+.profile-panel-head { display: flex; gap: 17px; align-items: center; padding-right: 35px; margin-bottom: 27px; }
+.profile-large-avatar { display: grid; flex: none; place-items: center; width: 58px; height: 58px; border-radius: 18px; background: linear-gradient(145deg, #ba9fff, #6651c8); font: 700 24px Unbounded, sans-serif; box-shadow: 0 10px 28px rgba(125, 92, 235, .35); }
+.profile-panel h2 { margin: 0 0 5px; font: 700 22px/1.25 Unbounded, sans-serif; letter-spacing: -1px; }.profile-panel-head .section-label { margin: 0 0 5px; }.profile-panel-head p:last-child { margin: 0; color: var(--muted); font-size: 13px; }
+.profile-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }.profile-fields label, .profile-panel fieldset { color: #aaa6ba; font-size: 12px; font-weight: 700; }.profile-fields label { display: flex; flex-direction: column; gap: 7px; }.profile-fields .wide { grid-column: span 2; }
+.profile-fields input, .profile-fields select { width: 100%; min-height: 44px; border: 1px solid #373247; border-radius: 10px; padding: 0 12px; background: #11101a; color: #f5f2fa; font: 600 14px Manrope, sans-serif; outline: none; }.profile-fields input:focus, .profile-fields select:focus { border-color: var(--violet); }
+.profile-panel fieldset { margin: 23px 0; padding: 0; border: 0; }.profile-panel legend { margin-bottom: 10px; }.interest-list { display: flex; flex-wrap: wrap; gap: 8px; }.interest-list label { display: inline-flex; align-items: center; gap: 7px; border: 1px solid #363146; border-radius: 22px; padding: 8px 11px; color: #d7d3e4; font-size: 12px; cursor: pointer; }.interest-list input { accent-color: #9a7dff; }
+.profile-save { display: flex; align-items: center; justify-content: space-between; gap: 20px; border-top: 1px solid var(--line); padding-top: 20px; }.profile-save p { margin: 0; color: #a6a2b3; font-size: 12px; }.profile-save .primary { border: 0; white-space: nowrap; }
+@media (max-width: 560px) { .profile-panel { padding: 26px 19px; }.profile-fields { grid-template-columns: 1fr; }.profile-fields .wide { grid-column: span 1; }.profile-save { align-items: stretch; flex-direction: column; }.profile-save .primary { justify-content: center; } }

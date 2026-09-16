@@ -14,7 +14,7 @@
   <header class="topbar">
     <a class="brand" href="#top" aria-label="StudentHub KZ"><span class="brand-mark">S</span><span>StudentHub <b>KZ</b></span></a>
     <nav aria-label="Основная навигация"><a href="#opportunities" data-i18n="navOpportunities">Возможности</a><a href="#feed" data-i18n="navFeed">Подборки</a><a href="#community" data-i18n="navCommunity">Сообщество</a></nav>
-    <div class="top-actions"><button class="lang-toggle" type="button" aria-label="Switch language">KZ</button><button class="profile" type="button"><span class="avatar">Д</span><span data-i18n="profile">Мой профиль</span></button></div>
+    <div class="top-actions"><button class="lang-toggle" type="button" aria-label="Switch language">KZ</button><button class="profile" id="profileTrigger" type="button" aria-haspopup="dialog"><span class="avatar" id="profileInitial">Д</span><span data-i18n="profile">Мой профиль</span></button></div>
   </header>
 
   <main id="top">
@@ -69,7 +69,26 @@
       <div class="discussion"><div class="discussion-top"><span class="avatar purple">С</span><div><b>Student Talks</b><small>2 840 участников</small></div><span class="online">● <span data-i18n="online">сейчас онлайн</span></span></div><p data-i18n="question">«Где найти хорошую стажировку после 2 курса?»</p><div class="replies"><span>💬 24 <span data-i18n="answers">ответа</span></span><span>♡ 67</span><span class="latest"><i></i><i></i><i></i> +3 <span data-i18n="newReplies">новых</span></span></div></div>
     </section>
   </main>
+  <div class="profile-dialog" id="profileDialog" role="dialog" aria-modal="true" aria-labelledby="profileTitle" hidden>
+    <div class="profile-backdrop" data-close-profile></div>
+    <section class="profile-panel">
+      <button class="dialog-close" type="button" data-close-profile aria-label="Закрыть">×</button>
+      <div class="profile-panel-head"><div class="profile-large-avatar" id="profileLargeInitial">Д</div><div><p class="section-label">ЛИЧНЫЙ КАБИНЕТ</p><h2 id="profileTitle">Настройте свой профиль</h2><p>Это поможет показывать подходящие возможности.</p></div></div>
+      <form id="profileForm">
+        <div class="profile-fields">
+          <label>Ваше имя<input id="profileName" name="name" type="text" value="Данияр" maxlength="32" required></label>
+          <label>Город<select id="profileCity" name="city"><option>Туркестан</option><option>Алматы</option><option>Астана</option><option>Шымкент</option></select></label>
+          <label class="wide">Университет<select id="profileUniversity" name="university"><option>Международный казахско-турецкий университет</option><option>КазНУ им. аль-Фараби</option><option>Astana IT University</option><option>МУИТ</option><option>Другой университет</option></select></label>
+          <label>Направление<select id="profileSpecialty" name="specialty"><option>IT и технологии</option><option>Бизнес и экономика</option><option>Дизайн</option><option>Педагогика</option><option>Право</option></select></label>
+          <label>Курс<select id="profileCourse" name="course"><option>1 курс</option><option selected>2 курс</option><option>3 курс</option><option>4 курс</option><option>Магистратура</option></select></label>
+        </div>
+        <fieldset><legend>Что вам интересно</legend><div class="interest-list"><label><input name="interest" value="Стажировки" type="checkbox" checked>Стажировки</label><label><input name="interest" value="Гранты" type="checkbox" checked>Гранты</label><label><input name="interest" value="События" type="checkbox" checked>События</label><label><input name="interest" value="Жильё" type="checkbox">Жильё</label><label><input name="interest" value="Учебные материалы" type="checkbox">Учебные материалы</label></div></fieldset>
+        <div class="profile-save"><p id="profileStatus" aria-live="polite">Профиль можно изменить в любой момент.</p><button class="primary" type="submit">Сохранить профиль <span>→</span></button></div>
+      </form>
+    </section>
+  </div>
   <footer><a class="brand" href="#top"><span class="brand-mark">S</span><span>StudentHub <b>KZ</b></span></a><span>© 2026 StudentHub KZ</span><span data-i18n="footer">Создано для студентов Казахстана</span></footer>
   <script src="script.js"></script>
+  <script src="profile.js"></script>
 </body>
 </html>
