@@ -9,6 +9,22 @@
   transform: translateY(-3px);
 }
 
+.filters select,
+.profile-fields select {
+  color-scheme: dark;
+}
+
+.filters select option,
+.profile-fields select option {
+  background: #100f1a;
+  color: #ffffff;
+}
+
+@media (max-width: 1100px) and (min-width: 801px) {
+  .filters { grid-template-columns: 1fr 1fr; }
+  .filters .primary { grid-column: span 2; justify-content: center; }
+}
+
 .profile-dialog[hidden] { display: none; }
 .profile-dialog { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; padding: 20px; }
 .profile-backdrop { position: absolute; inset: 0; background: rgba(3, 2, 8, .72); backdrop-filter: blur(8px); }
