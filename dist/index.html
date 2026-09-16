@@ -98,6 +98,13 @@
           <label class="wide">Пароль<input id="loginPassword" name="password" type="password" autocomplete="current-password" placeholder="Введите пароль" required></label>
         </div>
         <div class="profile-save"><p id="loginStatus" aria-live="polite">Данные входа не сохраняются на этом этапе.</p><button class="primary" type="submit">Войти <span>→</span></button></div>
+        <div class="login-divider"><span>или войдите через</span></div>
+        <div class="social-login" aria-label="Вход через социальные сервисы">
+          <button type="button" data-login-provider="Apple"><span class="social-symbol apple-symbol" aria-hidden="true">●</span>Apple</button>
+          <button type="button" data-login-provider="Google"><span class="social-symbol google-symbol" aria-hidden="true">G</span>Google</button>
+          <button type="button" data-login-provider="Microsoft"><span class="social-symbol microsoft-symbol" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Microsoft</button>
+        </div>
+        <p class="login-register">Нет аккаунта? <button type="button" data-register>Зарегистрироваться</button></p>
       </form>
     </section>
   </div>

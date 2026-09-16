@@ -25,6 +25,16 @@ loginForm.addEventListener('submit', (event) => {
   loginPassword.value = '';
 });
 
+loginDialog.querySelectorAll('[data-login-provider]').forEach((button) => {
+  button.addEventListener('click', () => {
+    loginStatus.textContent = `Вход через ${button.dataset.loginProvider} станет доступен после подключения авторизации.`;
+  });
+});
+
+loginDialog.querySelector('[data-register]').addEventListener('click', () => {
+  loginStatus.textContent = 'Регистрация станет доступна после подключения базы данных.';
+});
+
 document.addEventListener('keydown', (event) => {
   if (event.key === 'Escape' && !loginDialog.hidden) closeLogin();
 });
