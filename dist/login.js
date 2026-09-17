@@ -13,6 +13,9 @@ const authSubmit = document.querySelector('#authSubmit');
 const socialDividerText = document.querySelector('#socialDividerText');
 const authQuestion = document.querySelector('#authQuestion');
 const authModeToggle = loginDialog.querySelector('[data-auth-mode-toggle]');
+const authEyebrow = document.querySelector('#authEyebrow');
+const authAvatar = document.querySelector('#authAvatar');
+const authTabs = loginDialog.querySelectorAll('[data-auth-tab]');
 let registrationMode = false;
 
 async function authRequest(url, body) {
@@ -41,8 +44,16 @@ function setAuthMode(registering) {
   registrationMode = registering;
   registrationFields.forEach((field) => {
     field.hidden = !registering;
-    field.querySelector('input').disabled = !registering;
+    const input = field.querySelector('input');
+    if (input) input.disabled = !registering;
   });
+  authTabs.forEach((tab) => {
+    const selected = tab.dataset.authTab === (registering ? 'register' : 'login');
+    tab.classList.toggle('active', selected);
+    tab.setAttribute('aria-selected', String(selected));
+  });
+  authEyebrow.textContent = registering ? 'НОВЫЙ ЛИЧНЫЙ КАБИНЕТ' : 'ВХОД В ЛИЧНЫЙ КАБИНЕТ';
+  authAvatar.textContent = registering ? '+' : 'S';
   authTitle.textContent = registering ? 'Создать аккаунт' : 'Войти в StudentHub KZ';
   authSubtitle.textContent = registering ? 'Заполните данные, чтобы зарегистрироваться.' : 'Введите email и пароль, чтобы продолжить.';
   authSubmit.innerHTML = `${registering ? 'Зарегистрироваться' : 'Войти'} <span>→</span>`;
@@ -50,6 +61,7 @@ function setAuthMode(registering) {
   authQuestion.textContent = registering ? 'Уже есть аккаунт?' : 'Нет аккаунта?';
   authModeToggle.textContent = registering ? 'Войти' : 'Зарегистрироваться';
   loginPassword.autocomplete = registering ? 'new-password' : 'current-password';
+  registerPasswordConfirm.autocomplete = 'new-password';
   loginStatus.textContent = registrationMode ? 'Пароль хранится на сервере только в защищённом виде.' : 'Введите данные своего аккаунта.';
   if (registering) registerName.focus(); else loginEmail.focus();
 }
@@ -89,5 +101,6 @@ loginDialog.querySelectorAll('[data-login-provider]').forEach((button) => {
 });
 
 authModeToggle.addEventListener('click', () => setAuthMode(!registrationMode));
+authTabs.forEach((tab) => tab.addEventListener('click', () => setAuthMode(tab.dataset.authTab === 'register')));
 document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && !loginDialog.hidden) closeLogin(); });
 restoreSession();

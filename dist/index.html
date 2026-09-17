@@ -102,13 +102,19 @@
     <div class="profile-backdrop" data-close-login></div>
     <section class="profile-panel login-panel">
       <button class="dialog-close" type="button" data-close-login aria-label="Закрыть">×</button>
-      <div class="profile-panel-head"><div class="profile-large-avatar">S</div><div><p class="section-label">ЛИЧНЫЙ КАБИНЕТ</p><h2 id="loginTitle">Войти в StudentHub KZ</h2><p id="authSubtitle">Введите email и пароль, чтобы продолжить.</p></div></div>
+      <div class="profile-panel-head"><div class="profile-large-avatar" id="authAvatar">S</div><div><p class="section-label" id="authEyebrow">ВХОД В ЛИЧНЫЙ КАБИНЕТ</p><h2 id="loginTitle">Войти в StudentHub KZ</h2><p id="authSubtitle">Введите email и пароль, чтобы продолжить.</p></div></div>
       <form id="loginForm">
+        <div class="auth-mode-tabs" role="tablist" aria-label="Выбор действия">
+          <button type="button" class="active" data-auth-tab="login" role="tab" aria-selected="true">Вход</button>
+          <button type="button" data-auth-tab="register" role="tab" aria-selected="false">Регистрация</button>
+        </div>
         <div class="profile-fields login-fields">
           <label class="wide registration-only" hidden>Ваше имя<input id="registerName" name="name" type="text" autocomplete="name" placeholder="Как к вам обращаться" disabled required></label>
           <label class="wide">Email<input id="loginEmail" name="email" type="email" autocomplete="email" placeholder="name@example.com" required></label>
           <label class="wide">Пароль<input id="loginPassword" name="password" type="password" autocomplete="current-password" placeholder="Введите пароль" minlength="8" required></label>
           <label class="wide registration-only" hidden>Повторите пароль<input id="registerPasswordConfirm" name="passwordConfirm" type="password" autocomplete="new-password" placeholder="Повторите пароль" disabled required></label>
+          <p class="auth-registration-note registration-only" hidden>Создадим личный кабинет, где можно сохранить город, университет и избранные возможности.</p>
+          <label class="auth-agreement registration-only" hidden><input id="registerAgreement" name="agreement" type="checkbox" disabled required> <span>Я согласен(на) с правилами платформы и обработкой данных профиля.</span></label>
         </div>
         <div class="profile-save"><p id="loginStatus" aria-live="polite">Данные входа не сохраняются на этом этапе.</p><button class="primary" id="authSubmit" type="submit">Войти <span>→</span></button></div>
         <div class="login-divider"><span id="socialDividerText">или войдите через</span></div>
