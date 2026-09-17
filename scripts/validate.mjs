@@ -20,4 +20,20 @@ const catalog = await worker.fetch(
   { DB: db },
 );
 assert.deepEqual(await catalog.json(), { items: [] });
+const writes = [];
+const adminDb = {
+  prepare(sql) {
+    return {
+      bind(...params) { this.params = params; return this; },
+      async all() { return { results: [] }; },
+      async run() { writes.push(sql); return { meta: {} }; },
+    };
+  },
+};
+const admin = await worker.fetch(
+  new Request("https://studenthub.test/api/admin/catalog", { headers: { "oai-authenticated-user-id": "owner", "oai-authenticated-user-email": "owner@example.com" } }),
+  { DB: adminDb, ADMIN_EMAILS: "owner@example.com" },
+);
+assert.equal(admin.status, 200);
+assert.equal(writes.length, 1);
 console.log("Worker entrypoint is valid.");

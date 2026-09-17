@@ -16,6 +16,10 @@ function requireDb(env) {
   return env.DB;
 }
 
+function configuredAdminEmails(env) {
+  return text(env.ADMIN_EMAILS).split(",").map((email) => email.trim().toLowerCase()).filter(Boolean);
+}
+
 async function userFor(env, request) {
   const person = identity(request);
   if (!person) return null;
@@ -31,6 +35,12 @@ async function requireRegistered(env, request) {
 }
 
 async function requireAdmin(env, request) {
+  const person = identity(request);
+  if (person && configuredAdminEmails(env).includes(person.email.toLowerCase())) {
+    const db = requireDb(env);
+    await db.prepare("INSERT INTO users (id,email,display_name,role) VALUES (?,?,?,?) ON CONFLICT(id) DO UPDATE SET email=excluded.email,display_name=excluded.display_name,role='admin',updated_at=CURRENT_TIMESTAMP").bind(person.id, person.email, person.name.slice(0, 80), "admin").run();
+    return { ...person, role: "admin", authenticated: true };
+  }
   const user = await requireRegistered(env, request);
   return user?.role === "admin" ? user : null;
 }
@@ -73,7 +83,7 @@ async function detail(env, type, slug) {
 async function register(env, request) {
   const person = identity(request); if (!person) return error("Войдите через ChatGPT, чтобы создать профиль.", 401);
   const db = requireDb(env); const body = await request.json(); const displayName = text(body.displayName, person.name).slice(0, 80) || person.email;
-  const configuredAdmins = text(env.ADMIN_EMAILS).split(",").map((email) => email.trim().toLowerCase()).filter(Boolean);
+  const configuredAdmins = configuredAdminEmails(env);
   const role = configuredAdmins.includes(person.email.toLowerCase()) ? "admin" : "student";
   await db.prepare("INSERT INTO users (id,email,display_name,role) VALUES (?,?,?,?) ON CONFLICT(id) DO UPDATE SET email=excluded.email, display_name=excluded.display_name, role=CASE WHEN users.role='admin' THEN 'admin' ELSE excluded.role END, updated_at=CURRENT_TIMESTAMP").bind(person.id, person.email, displayName, role).run();
   await db.prepare("INSERT INTO student_profiles (user_id,city,specialty,study_year) VALUES (?,?,?,?) ON CONFLICT(user_id) DO UPDATE SET city=excluded.city,specialty=excluded.specialty,study_year=excluded.study_year,updated_at=CURRENT_TIMESTAMP").bind(person.id, text(body.city), text(body.specialty), Number(body.studyYear) || null).run();
