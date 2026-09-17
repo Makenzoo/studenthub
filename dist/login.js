@@ -103,4 +103,5 @@ loginDialog.querySelectorAll('[data-login-provider]').forEach((button) => {
 authModeToggle.addEventListener('click', () => setAuthMode(!registrationMode));
 authTabs.forEach((tab) => tab.addEventListener('click', () => setAuthMode(tab.dataset.authTab === 'register')));
 document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && !loginDialog.hidden) closeLogin(); });
+setAuthMode(false);
 restoreSession();
