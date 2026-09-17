@@ -15,6 +15,28 @@ const authQuestion = document.querySelector('#authQuestion');
 const authModeToggle = loginDialog.querySelector('[data-auth-mode-toggle]');
 let registrationMode = false;
 
+async function authRequest(url, body) {
+  const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  const payload = await response.json();
+  if (!response.ok) throw new Error(payload.error || 'Не удалось выполнить запрос.');
+  return payload;
+}
+
+function setSignedIn(user) {
+  const initial = (user.display_name || user.email || 'С').trim().charAt(0).toUpperCase();
+  document.querySelector('#profileInitial').textContent = initial;
+  loginTrigger.querySelector('span:last-child').textContent = user.display_name || 'Профиль';
+  loginTrigger.dataset.signedIn = 'true';
+}
+
+async function restoreSession() {
+  try {
+    const response = await fetch('/api/auth/session');
+    const payload = await response.json();
+    if (payload.user) setSignedIn(payload.user);
+  } catch (_) { /* Static previews do not have the PHP API. */ }
+}
+
 function setAuthMode(registering) {
   registrationMode = registering;
   registrationFields.forEach((field) => {
@@ -28,49 +50,44 @@ function setAuthMode(registering) {
   authQuestion.textContent = registering ? 'Уже есть аккаунт?' : 'Нет аккаунта?';
   authModeToggle.textContent = registering ? 'Войти' : 'Зарегистрироваться';
   loginPassword.autocomplete = registering ? 'new-password' : 'current-password';
-  loginStatus.textContent = registering ? 'Создайте аккаунт за несколько шагов.' : 'Данные входа не сохраняются на этом этапе.';
+  loginStatus.textContent = registrationMode ? 'Пароль хранится на сервере только в защищённом виде.' : 'Введите данные своего аккаунта.';
   if (registering) registerName.focus(); else loginEmail.focus();
 }
 
-function openLogin() {
-  loginDialog.hidden = false;
-  document.body.style.overflow = 'hidden';
-  loginEmail.focus();
-}
-
-function closeLogin() {
-  loginDialog.hidden = true;
-  document.body.style.overflow = '';
-}
+function openLogin() { loginDialog.hidden = false; document.body.style.overflow = 'hidden'; loginEmail.focus(); }
+function closeLogin() { loginDialog.hidden = true; document.body.style.overflow = ''; }
 
 loginTrigger.addEventListener('click', openLogin);
 loginDialog.querySelectorAll('[data-close-login]').forEach((element) => element.addEventListener('click', closeLogin));
 
-loginForm.addEventListener('submit', (event) => {
+loginForm.addEventListener('submit', async (event) => {
   event.preventDefault();
   if (registrationMode && loginPassword.value !== registerPasswordConfirm.value) {
     loginStatus.textContent = 'Пароли не совпадают. Проверьте их и попробуйте снова.';
     registerPasswordConfirm.focus();
     return;
   }
-  loginStatus.textContent = registrationMode
-    ? 'Регистрация будет доступна после подключения базы данных.'
-    : 'Вход станет доступен после подключения базы данных.';
-  loginPassword.value = '';
-  registerPasswordConfirm.value = '';
+  authSubmit.disabled = true;
+  loginStatus.textContent = 'Проверяем данные…';
+  try {
+    const body = { email: loginEmail.value.trim(), password: loginPassword.value };
+    if (registrationMode) body.displayName = registerName.value.trim();
+    const result = await authRequest(registrationMode ? '/api/auth/register' : '/api/auth/login', body);
+    setSignedIn(result.user);
+    loginStatus.textContent = registrationMode ? 'Аккаунт создан.' : 'Вы вошли в аккаунт.';
+    loginForm.reset();
+    setTimeout(closeLogin, 500);
+  } catch (error) {
+    loginStatus.textContent = error.message;
+  } finally {
+    authSubmit.disabled = false;
+  }
 });
 
 loginDialog.querySelectorAll('[data-login-provider]').forEach((button) => {
-  button.addEventListener('click', () => {
-    const action = registrationMode ? 'Регистрация' : 'Вход';
-    loginStatus.textContent = `${action} через ${button.dataset.loginProvider} станет доступен после подключения авторизации.`;
-  });
+  button.addEventListener('click', () => { loginStatus.textContent = `Вход через ${button.dataset.loginProvider} будет добавлен после настройки OAuth-ключей на сервере.`; });
 });
 
-authModeToggle.addEventListener('click', () => {
-  setAuthMode(!registrationMode);
-});
-
-document.addEventListener('keydown', (event) => {
-  if (event.key === 'Escape' && !loginDialog.hidden) closeLogin();
-});
+authModeToggle.addEventListener('click', () => setAuthMode(!registrationMode));
+document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && !loginDialog.hidden) closeLogin(); });
+restoreSession();

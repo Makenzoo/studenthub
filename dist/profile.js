@@ -93,3 +93,42 @@ form.addEventListener('submit', event => {
 });
 
 try { applyProfile(JSON.parse(localStorage.getItem(profileKey))); } catch { localStorage.removeItem(profileKey); }
+
+async function syncProfileFromServer() {
+  try {
+    const response = await fetch('/api/profile');
+    if (!response.ok) return;
+    const { profile } = await response.json();
+    if (!profile) return;
+    const localProfile = {
+      name: profile.display_name,
+      city: profile.city,
+      university: profile.university_name,
+      specialty: profile.specialty,
+      course: profile.study_year,
+      interests: []
+    };
+    applyProfile(localProfile);
+    localStorage.setItem(profileKey, JSON.stringify(localProfile));
+  } catch (_) { /* Static previews do not expose the PHP API. */ }
+}
+
+form.addEventListener('submit', async () => {
+  const values = new FormData(form);
+  try {
+    const response = await fetch('/api/profile', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        displayName: values.get('name').trim(),
+        city: values.get('city'),
+        university: values.get('university'),
+        specialty: values.get('specialty'),
+        studyYear: values.get('course')
+      })
+    });
+    if (response.ok) status.textContent = 'Профиль сохранён и синхронизирован с сервером.';
+  } catch (_) { /* The local profile remains usable when the server is unavailable. */ }
+});
+
+syncProfileFromServer();
