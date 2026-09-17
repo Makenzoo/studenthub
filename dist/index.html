@@ -7,7 +7,7 @@
   <title>StudentHub KZ — всё для студенческой жизни</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath fill='%239d7cff' d='M4 24 32 10l28 14-28 14L4 24Z'/%3E%3Cpath fill='%2349d7ff' d='M14 31v12c0 7 36 7 36 0V31L32 40 14 31Z'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="updates.css?v=20260917-2">
+  <link rel="stylesheet" href="updates.css?v=20260917-3">
 </head>
 <body>
   <div class="orb orb-a"></div><div class="orb orb-b"></div><div class="grid-glow"></div>
@@ -54,6 +54,17 @@
         <a class="feature-card orange" href="events.html"><div class="icon">✦</div><h3 data-i18n="events">Мероприятия</h3><p data-i18n="eventsText">Хакатоны, олимпиады и конференции.</p><span>28 <span data-i18n="thisMonth">в этом месяце</span></span></a>
         <a class="feature-card green" href="grants.html"><div class="icon">₸</div><h3 data-i18n="grants">Гранты</h3><p data-i18n="grantsText">Стипендии, программы и дедлайны.</p><span>17 <span data-i18n="open">открыты</span></span></a>
         <a class="feature-card cyan" href="market.html"><div class="icon">↔</div><h3 data-i18n="market">Обмен</h3><p data-i18n="marketText">Книги, техника и вещи от студентов.</p><span>312 <span data-i18n="offers">предложений</span></span></a>
+      </div>
+    </section>
+
+    <section class="student-plan" id="student-plan" aria-labelledby="plan-title">
+      <div class="plan-copy"><p class="section-label" data-i18n="planLabel">ВАШ ПЛАН</p><h2 id="plan-title" data-i18n="planTitle">Начните с простых шагов</h2><p data-i18n="planText">Отмечайте выполненное — прогресс сохранится на этом устройстве.</p></div>
+      <div class="plan-card">
+        <div class="plan-progress"><span data-i18n="planProgress">Выполнено</span><b id="planProgressValue">0/3</b></div>
+        <div class="plan-progress-bar"><span id="planProgressBar"></span></div>
+        <label class="plan-item"><input type="checkbox" data-plan-step="profile"><span><b data-i18n="planProfile">Настройте подборку</b><small data-i18n="planProfileText">Выберите город и направление.</small></span></label>
+        <label class="plan-item"><input type="checkbox" data-plan-step="explore"><span><b data-i18n="planExplore">Изучите возможности</b><small data-i18n="planExploreText">Откройте вакансии, гранты или мероприятия.</small></span></label>
+        <label class="plan-item"><input type="checkbox" data-plan-step="community"><span><b data-i18n="planCommunity">Задайте вопрос сообществу</b><small data-i18n="planCommunityText">Найдите опыт студентов с похожими целями.</small></span></label>
       </div>
     </section>
 
@@ -142,12 +153,13 @@
   </div>
   <footer><a class="brand" href="#top"><span class="brand-mark">S</span><span>StudentHub <b>KZ</b></span></a><span>© 2026 StudentHub KZ</span><span data-i18n="footer">Создано для студентов Казахстана</span></footer>
   <script src="script.js"></script>
-  <script src="i18n.js?v=20260917-2"></script>
+  <script src="i18n.js?v=20260917-3"></script>
   <script src="profile.js"></script>
   <script src="login.js"></script>
   <script src="counter.js"></script>
   <script src="selection.js"></script>
   <script src="assistant.js"></script>
+  <script src="checklist.js?v=20260917-1"></script>
 </body>
 </html>
 

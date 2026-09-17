@@ -26,6 +26,15 @@ html[lang="kz"] body * {
   font-family: Arial, "Segoe UI", sans-serif !important;
 }
 
+.student-plan { max-width: 1184px; margin: -36px auto 112px; padding: 34px 38px; display: grid; grid-template-columns: 1fr 1.1fr; gap: 42px; border: 1px solid rgba(105, 217, 255, .19); border-radius: 22px; background: linear-gradient(120deg, rgba(16, 27, 47, .95), rgba(25, 19, 47, .95)); }
+.student-plan h2 { margin: 0 0 13px; font: 700 clamp(24px, 3vw, 34px)/1.18 Unbounded, sans-serif; letter-spacing: -1.4px; }
+.student-plan .plan-copy > p:not(.section-label) { max-width: 390px; margin: 0; color: #c3bfd5; font-size: 14px; }
+.plan-card { padding: 20px; border: 1px solid rgba(255,255,255,.1); border-radius: 16px; background: rgba(9, 10, 20, .48); }
+.plan-progress { display: flex; justify-content: space-between; color: #b8b4c8; font-size: 12px; font-weight: 700; }.plan-progress b { color: #fff; }
+.plan-progress-bar { height: 6px; margin: 11px 0 16px; overflow: hidden; border-radius: 10px; background: #29243b; }.plan-progress-bar span { display: block; width: 0; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #67ddff, #9b7cff); transition: width .25s ease; }
+.plan-item { display: flex; align-items: flex-start; gap: 11px; padding: 12px 0; border-top: 1px solid rgba(255,255,255,.08); cursor: pointer; }.plan-item input { width: 17px; height: 17px; margin: 2px 0 0; accent-color: #8d70f4; }.plan-item span { display: grid; gap: 3px; }.plan-item b { font-size: 13px; }.plan-item small { color: #a5a1b6; font-size: 12px; }.plan-item:has(input:checked) b { color: #86e5bc; text-decoration: line-through; }.plan-item:has(input:checked) small { opacity: .65; }
+@media (max-width: 800px) { .student-plan { margin: -15px 20px 75px; padding: 28px 24px; grid-template-columns: 1fr; gap: 24px; } }
+
 @media (max-width: 1100px) and (min-width: 801px) {
   .filters { grid-template-columns: 1fr 1fr; }
   .filters .primary { grid-column: span 2; justify-content: center; }
