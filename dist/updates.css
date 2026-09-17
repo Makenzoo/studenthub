@@ -20,6 +20,12 @@
   color: #ffffff;
 }
 
+/* Unbounded does not contain every Kazakh glyph, which caused browser font fallback inside words. */
+html[lang="kz"] body,
+html[lang="kz"] body * {
+  font-family: Arial, "Segoe UI", sans-serif !important;
+}
+
 @media (max-width: 1100px) and (min-width: 801px) {
   .filters { grid-template-columns: 1fr 1fr; }
   .filters .primary { grid-column: span 2; justify-content: center; }
