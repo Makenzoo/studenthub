@@ -17,6 +17,7 @@
     ru: { signIn: 'Войти', registered: 'зарегистрированных пользователей', source: 'Данные проверены 16 сентября 2026 года. Карточки ведут на официальные страницы и живые каталоги.', job: 'Стажировки на hh.kz', jobNote: 'Актуальные объявления', profile: 'Настройте свой профиль', profileNote: 'Это поможет показывать подходящие возможности.', name: 'Ваше имя', course: 'Курс', interests: 'Что вам интересно', save: 'Сохранить профиль →', login: 'Войти в StudentHub KZ', loginNote: 'Введите email и пароль, чтобы продолжить.', password: 'Пароль', assistant: 'AI Ассистент', assistantTitle: 'Чем помочь?', assistantNote: 'Онлайн · ответы не сохраняются', assistantGreeting: 'Помогу найти стажировку, грант, жильё, мероприятие или учебные материалы. С чего начнём?', placeholder: 'Напишите вопрос…', filterTitle: 'Фильтры возможностей', filterNote: 'Настройте список под свою задачу.', reset: 'Сбросить' },
     kz: { signIn: 'Кіру', registered: 'тіркелген пайдаланушы', source: 'Деректер 2026 жылғы 16 қыркүйекте тексерілді. Карточкалар ресми беттер мен белсенді каталогтарға апарады.', job: 'hh.kz тағылымдамалары', jobNote: 'Өзекті хабарландырулар', profile: 'Профильді баптаңыз', profileNote: 'Бұл сізге лайық мүмкіндіктерді көрсетуге көмектеседі.', name: 'Атыңыз', course: 'Курс', interests: 'Сізді не қызықтырады', save: 'Профильді сақтау →', login: 'StudentHub KZ жүйесіне кіру', loginNote: 'Жалғастыру үшін email және құпиясөзді енгізіңіз.', password: 'Құпиясөз', assistant: 'AI Көмекші', assistantTitle: 'Қалай көмектесейін?', assistantNote: 'Желіде · жауаптар сақталмайды', assistantGreeting: 'Тағылымдаманы, грантты, баспананы, іс-шараны немесе оқу материалдарын табуға көмектесемін. Неден бастаймыз?', placeholder: 'Сұрағыңызды жазыңыз…', filterTitle: 'Мүмкіндіктер сүзгілері', filterNote: 'Тізімді мақсатыңызға сай баптаңыз.', reset: 'Тазарту' },
   };
+  const cityNames = { 'Туркестан': 'Түркістан', 'Астана': 'Астана', 'Алматы': 'Алматы', 'Шымкент': 'Шымкент', 'Актобе': 'Ақтөбе', 'Актау': 'Ақтау', 'Атырау': 'Атырау', 'Караганда': 'Қарағанды', 'Каскелен': 'Қаскелең', 'Кокшетау': 'Көкшетау', 'Костанай': 'Қостанай', 'Кызылорда': 'Қызылорда', 'Павлодар': 'Павлодар', 'Петропавловск': 'Петропавл', 'Семей': 'Семей', 'Талдыкорган': 'Талдықорған', 'Тараз': 'Тараз', 'Уральск': 'Орал', 'Усть-Каменогорск': 'Өскемен', 'Жезказган': 'Жезқазған' };
   const translatedCards = {
     jobs: [['◈','Тағылымдама және практика','hh.kz','Студенттерге арналған вакансияларды белсенді іздеу','Каталогты ашу','#b49fff','https://hh.kz/search/vacancy?text=%D1%81%D1%82%D0%B0%D0%B6%D0%B5%D1%80'],['</>','IT вакансиялары','Astana Hub','Технопарк компанияларының вакансиялары','Каталогты ашу','#65d9ff','https://astanahub.com/ru/vacancy/'],['✦','Студенттерге жұмыс','Enbek.kz','Ұлттық еңбек биржасы','Іздеуді ашу','#ff9ec4','https://www.enbek.kz/ru/search/vacancy']],
     events: [['✦','TECH DISCOVERY','16 қыркүйек, 11:00','Turkistan Hub · IT бағыттары','Astana Hub тіркелу','#65d9ff','https://astanahub.com/ru/event/'],['◉','AI Agentic Skills','16 қыркүйек, 10:00','Павлодар · Торайғыров университеті','Astana Hub тіркелу','#b49fff','https://astanahub.com/ru/event/'],['◈','CodeMasters Hackathon 7.0','2026 жылғы 15–22 қыркүйек','Өскемен · жүлде қоры 1 млн ₸','Astana Hub тіркелу','#85e0b1','https://astanahub.com/ru/event/']],
@@ -27,7 +28,7 @@
   const set = (selector, value, html = false) => document.querySelectorAll(selector).forEach((node) => { if (html) node.innerHTML = value; else node.textContent = value; });
   const setLeadingLabel = (selector, value) => document.querySelectorAll(selector).forEach((node) => { if (node.childNodes[0]?.nodeType === Node.TEXT_NODE) node.childNodes[0].nodeValue = value; });
   const updateFinder = () => {
-    const city = document.querySelector('#city')?.value || '';
+    const city = document.querySelector('#city')?.selectedOptions[0]?.textContent || '';
     const specialty = document.querySelector('#specialty')?.selectedOptions[0]?.textContent || '';
     const result = document.querySelector('#filterResult');
     if (result) result.textContent = language() === 'kz' ? `${city} қаласындағы ${specialty} студенттеріне арналған мүмкіндіктерді көрсетеміз` : `Подбираем возможности для студентов ${specialty} в городе ${city}`;
@@ -46,6 +47,7 @@
     document.querySelectorAll('[data-i18n]').forEach((node) => { const value = isKz ? kz[node.dataset.i18n] : null; if (value) node.innerHTML = value; });
     const l = labels[language()];
     set('#profileTrigger span:last-child', l.signIn); set('#registeredUsersLabel', l.registered); set('.source-note', l.source);
+    set('.discussion-top small', isKz ? '2 840 қатысушы' : '2 840 участников');
     set('.mini-card.job strong', l.job); set('.mini-card.job small:not([data-i18n])', l.jobNote);
     set('.profile-panel:not(.login-panel):not(.filter-panel) h2', l.profile); set('.profile-panel:not(.login-panel):not(.filter-panel) .profile-panel-head p:not(.section-label)', l.profileNote);
     setLeadingLabel('#profileForm label:nth-child(1)', l.name); setLeadingLabel('#profileForm label:nth-child(5)', l.course); set('#profileForm legend', l.interests); set('#profileForm .profile-save button', l.save);
@@ -54,6 +56,7 @@
     set('#aiAssistantTrigger span:last-child', l.assistant); set('#aiAssistantTitle', l.assistantTitle); set('.ai-head p:not(.section-label)', l.assistantNote); set('#aiMessages .ai-message-bot:first-child p', l.assistantGreeting);
     const input = document.querySelector('#aiAssistantInput'); if (input) input.placeholder = l.placeholder;
     document.querySelectorAll('#specialty option, #profileSpecialty option').forEach((option) => { const map = { 'IT и технологии': isKz ? 'IT және технологиялар' : 'IT и технологии', 'Бизнес и экономика': isKz ? 'Бизнес және экономика' : 'Бизнес и экономика', 'Дизайн': 'Дизайн', 'Педагогика': 'Педагогика', 'Право': isKz ? 'Құқық' : 'Право' }; option.textContent = map[option.value] || option.value; });
+    document.querySelectorAll('#city option, #profileCity option').forEach((option) => { option.textContent = isKz ? (cityNames[option.value] || option.value) : option.value; });
     updateFinder();
     if (isKz) renderKzCards();
     else document.querySelector('.feed-tabs .active')?.click();
@@ -62,6 +65,7 @@
   document.querySelector('.lang-toggle')?.addEventListener('click', () => window.setTimeout(() => { update(); document.dispatchEvent(new CustomEvent('studenthub:languagechange', { detail: { language: language() } })); }));
   document.querySelector('#city')?.addEventListener('change', () => window.setTimeout(updateFinder));
   document.querySelector('#specialty')?.addEventListener('change', () => window.setTimeout(updateFinder));
+  document.querySelector('#applyFilters')?.addEventListener('click', () => window.setTimeout(updateFinder));
   document.querySelectorAll('.feed-tabs button').forEach((button) => button.addEventListener('click', () => window.setTimeout(renderKzCards)));
   update();
 })();
