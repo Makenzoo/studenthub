@@ -1,7 +1,7 @@
 import { legacyAssets } from "./legacy-assets.js";
 
 const text = (value, fallback = "") => typeof value === "string" ? value.trim() : fallback;
-const json = (data, status = 200) => new Response(JSON.stringify(data), { status, headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" } });
+const json = (data, status = 200, extraHeaders = {}) => new Response(JSON.stringify(data), { status, headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store", ...extraHeaders } });
 const error = (message, status = 400) => json({ error: message }, status);
 const today = () => new Date().toISOString().slice(0, 10);
 
@@ -20,12 +20,102 @@ function configuredAdminEmails(env) {
   return text(env.ADMIN_EMAILS).split(",").map((email) => email.trim().toLowerCase()).filter(Boolean);
 }
 
+const encoder = new TextEncoder();
+let emailAuthTables;
+
+function base64(bytes) {
+  let output = "";
+  for (const byte of bytes) output += String.fromCharCode(byte);
+  return btoa(output);
+}
+
+function base64url(bytes) {
+  return base64(bytes).replaceAll("+", "-").replaceAll("/", "_").replaceAll("=", "");
+}
+
+function bytesFromBase64(value) {
+  const raw = atob(value);
+  return Uint8Array.from(raw, (character) => character.charCodeAt(0));
+}
+
+async function sha256(value) {
+  return base64url(new Uint8Array(await crypto.subtle.digest("SHA-256", encoder.encode(value))));
+}
+
+async function passwordHash(password, salt, iterations = 210000) {
+  const key = await crypto.subtle.importKey("raw", encoder.encode(password), "PBKDF2", false, ["deriveBits"]);
+  const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", hash: "SHA-256", salt: bytesFromBase64(salt), iterations }, key, 256);
+  return base64(new Uint8Array(bits));
+}
+
+function sameValue(left, right) {
+  if (left.length !== right.length) return false;
+  let difference = 0;
+  for (let index = 0; index < left.length; index += 1) difference |= left.charCodeAt(index) ^ right.charCodeAt(index);
+  return difference === 0;
+}
+
+function emailFrom(value) {
+  const email = text(value).toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 254) throw new Error("Укажите корректный email.");
+  return email;
+}
+
+function passwordFrom(value) {
+  if (typeof value !== "string" || value.length < 8 || value.length > 128) throw new Error("Пароль должен содержать от 8 до 128 символов.");
+  return value;
+}
+
+function readCookie(request, name) {
+  const match = request.headers.get("cookie")?.match(new RegExp(`(?:^|;\\s*)${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}=([^;]+)`));
+  return match ? match[1] : null;
+}
+
+async function ensureEmailAuthTables(db) {
+  emailAuthTables ||= db.exec(`
+    CREATE TABLE IF NOT EXISTS password_credentials (
+      user_id TEXT PRIMARY KEY NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      password_salt TEXT NOT NULL,
+      password_hash TEXT NOT NULL,
+      iterations INTEGER NOT NULL
+    );
+    CREATE TABLE IF NOT EXISTS email_sessions (
+      token_hash TEXT PRIMARY KEY NOT NULL,
+      user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      expires_at TEXT NOT NULL,
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE INDEX IF NOT EXISTS idx_email_sessions_expiry ON email_sessions(expires_at);
+  `);
+  return emailAuthTables;
+}
+
+async function sessionUser(env, request) {
+  const token = readCookie(request, "studenthub_auth");
+  if (!token) return null;
+  const db = requireDb(env);
+  await ensureEmailAuthTables(db);
+  return db.prepare("SELECT u.id,u.email,u.display_name,u.role FROM email_sessions s JOIN users u ON u.id=s.user_id WHERE s.token_hash=? AND s.expires_at>? LIMIT 1").bind(await sha256(token), new Date().toISOString()).first();
+}
+
+async function issueSession(env, userId) {
+  const db = requireDb(env);
+  await ensureEmailAuthTables(db);
+  const token = base64url(crypto.getRandomValues(new Uint8Array(32)));
+  const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30).toISOString();
+  await db.prepare("INSERT INTO email_sessions (token_hash,user_id,expires_at) VALUES (?,?,?)").bind(await sha256(token), userId, expiresAt).run();
+  return `studenthub_auth=${token}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=2592000`;
+}
+
 async function userFor(env, request) {
   const person = identity(request);
-  if (!person) return null;
-  const db = requireDb(env);
-  const row = await db.prepare("SELECT id, email, display_name, role FROM users WHERE id = ?").bind(person.id).first();
-  return row ? { ...row, authenticated: true } : { ...person, role: null, authenticated: true, registered: false };
+  if (person) {
+    const db = requireDb(env);
+    const row = await db.prepare("SELECT id, email, display_name, role FROM users WHERE id = ?").bind(person.id).first();
+    return row ? { ...row, authenticated: true } : { ...person, role: null, authenticated: true, registered: false };
+  }
+  const user = await sessionUser(env, request);
+  return user ? { ...user, authenticated: true } : null;
 }
 
 async function requireRegistered(env, request) {
@@ -80,6 +170,57 @@ async function detail(env, type, slug) {
   return item ? json({ item }) : error("Запись не найдена.", 404);
 }
 
+async function emailRegister(env, request) {
+  const db = requireDb(env);
+  await ensureEmailAuthTables(db);
+  const body = await request.json();
+  const email = emailFrom(body.email);
+  const password = passwordFrom(body.password);
+  const displayName = text(body.displayName, email).slice(0, 80) || email;
+  const existing = await db.prepare("SELECT id FROM users WHERE email=? LIMIT 1").bind(email).first();
+  if (existing) return error("Аккаунт с этим email уже существует. Войдите в него.", 409);
+  const id = crypto.randomUUID();
+  const salt = base64(crypto.getRandomValues(new Uint8Array(16)));
+  const hash = await passwordHash(password, salt);
+  const role = configuredAdminEmails(env).includes(email) ? "admin" : "student";
+  await db.prepare("INSERT INTO users (id,email,display_name,role) VALUES (?,?,?,?)").bind(id, email, displayName, role).run();
+  await db.prepare("INSERT INTO password_credentials (user_id,password_salt,password_hash,iterations) VALUES (?,?,?,?)").bind(id, salt, hash, 210000).run();
+  await db.prepare("INSERT INTO student_profiles (user_id,city,specialty,study_year) VALUES (?,?,?,?)").bind(id, text(body.city), text(body.specialty), Number(body.studyYear) || null).run();
+  return json({ ok: true, user: { id, email, display_name: displayName, role } }, 201, { "set-cookie": await issueSession(env, id) });
+}
+
+async function emailLogin(env, request) {
+  const db = requireDb(env);
+  await ensureEmailAuthTables(db);
+  const body = await request.json();
+  const email = emailFrom(body.email);
+  const password = passwordFrom(body.password);
+  const account = await db.prepare("SELECT u.id,u.email,u.display_name,u.role,c.password_salt,c.password_hash,c.iterations FROM users u JOIN password_credentials c ON c.user_id=u.id WHERE u.email=? LIMIT 1").bind(email).first();
+  if (!account) return error("Неверный email или пароль.", 401);
+  const candidate = await passwordHash(password, account.password_salt, account.iterations);
+  if (!sameValue(candidate, account.password_hash)) return error("Неверный email или пароль.", 401);
+  return json({ ok: true, user: { id: account.id, email: account.email, display_name: account.display_name, role: account.role } }, 200, { "set-cookie": await issueSession(env, account.id) });
+}
+
+async function emailLogout(env, request) {
+  const token = readCookie(request, "studenthub_auth");
+  if (token) {
+    const db = requireDb(env);
+    await ensureEmailAuthTables(db);
+    await db.prepare("DELETE FROM email_sessions WHERE token_hash=?").bind(await sha256(token)).run();
+  }
+  return json({ ok: true }, 200, { "set-cookie": "studenthub_auth=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0" });
+}
+
+async function authSession(env, request) {
+  return json({ user: await userFor(env, request) });
+}
+
+async function stats(env) {
+  const count = await requireDb(env).prepare("SELECT COUNT(*) AS count FROM users").first();
+  return json({ registeredUsers: Number(count?.count || 0) });
+}
+
 async function register(env, request) {
   const person = identity(request); if (!person) return error("Войдите через ChatGPT, чтобы создать профиль.", 401);
   const db = requireDb(env); const body = await request.json(); const displayName = text(body.displayName, person.name).slice(0, 80) || person.email;
@@ -131,4 +272,4 @@ function serveStaticAsset(request) {
   return new Response(bytes, { headers: { "content-type": asset.contentType } });
 }
 
-export default { async fetch(request, env) { const url=new URL(request.url); try { if(url.pathname==="/api/session") return json({user:await userFor(env,request)}); if(url.pathname==="/api/register"&&request.method==="POST") return register(env,request); if(url.pathname==="/api/profile") return profile(env,request); if(url.pathname==="/api/favorites"&&request.method==="GET") return favorites(env,request); if(url.pathname==="/api/favorites"&&request.method==="POST") return favorite(env,request); const m=url.pathname.match(/^\/api\/catalog\/(universities|university|grants|grant)(?:\/([a-z0-9-]+))?$/); if(m&&request.method==="GET"){const type=m[1].startsWith("university")?"university":"grant";return m[2]?detail(env,type,m[2]):catalog(env,type,request);} if(url.pathname==="/api/admin/catalog") return adminCatalog(env,request); const a=url.pathname.match(/^\/api\/admin\/(university|grant)$/); if(a&&request.method==="POST") return saveAdmin(env,request,a[1]); if(request.method!=="GET") return error("Не найдено.",404); const asset=serveStaticAsset(request); if(asset) return asset; return new Response(documentPage(url.pathname),{headers:{"content-type":"text/html; charset=utf-8"}}); } catch(e) { return error(e instanceof Error?e.message:"Сервис временно недоступен.",503); } } };
+export default { async fetch(request, env) { const url=new URL(request.url); try { if(url.pathname==="/api/session") return json({user:await userFor(env,request)}); if(url.pathname==="/api/auth/session") return authSession(env,request); if(url.pathname==="/api/auth/register"&&request.method==="POST") return emailRegister(env,request); if(url.pathname==="/api/auth/login"&&request.method==="POST") return emailLogin(env,request); if(url.pathname==="/api/auth/logout"&&request.method==="POST") return emailLogout(env,request); if(url.pathname==="/api/stats") return stats(env); if(url.pathname==="/api/register"&&request.method==="POST") return register(env,request); if(url.pathname==="/api/profile") return profile(env,request); if(url.pathname==="/api/favorites"&&request.method==="GET") return favorites(env,request); if(url.pathname==="/api/favorites"&&request.method==="POST") return favorite(env,request); const m=url.pathname.match(/^\/api\/catalog\/(universities|university|grants|grant)(?:\/([a-z0-9-]+))?$/); if(m&&request.method==="GET"){const type=m[1].startsWith("university")?"university":"grant";return m[2]?detail(env,type,m[2]):catalog(env,type,request);} if(url.pathname==="/api/admin/catalog") return adminCatalog(env,request); const a=url.pathname.match(/^\/api\/admin\/(university|grant)$/); if(a&&request.method==="POST") return saveAdmin(env,request,a[1]); if(request.method!=="GET") return error("Не найдено.",404); const asset=serveStaticAsset(request); if(asset) return asset; return new Response(documentPage(url.pathname),{headers:{"content-type":"text/html; charset=utf-8"}}); } catch(e) { return error(e instanceof Error?e.message:"Сервис временно недоступен.",503); } } };
