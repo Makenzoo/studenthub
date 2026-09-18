@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Личный кабинет StudentHub KZ">
+  <title>Личный кабинет — StudentHub KZ</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="profile-page.css">
+</head>
+<body>
+  <header class="cabinet-header">
+    <a class="brand" href="index.html#top" aria-label="StudentHub KZ"><span class="brand-mark">S</span><span>StudentHub <b>KZ</b></span></a>
+    <div class="cabinet-actions"><a class="back-link" href="index.html#top">← На главную</a><button class="logout-button" id="logoutButton" type="button">Выйти</button></div>
+  </header>
+
+  <main class="cabinet-main">
+    <section class="cabinet-hero">
+      <div class="profile-avatar" id="profileAvatar">S</div>
+      <div><p class="section-label">ЛИЧНЫЙ КАБИНЕТ</p><h1 id="cabinetGreeting">Ваш профиль</h1><p id="cabinetEmail">Загрузка данных аккаунта…</p></div>
+      <a class="admin-link" id="adminLink" href="/admin" hidden>Админ-панель →</a>
+    </section>
+
+    <div class="cabinet-grid">
+      <section class="cabinet-card">
+        <div class="card-head"><div><p class="section-label">О СЕБЕ</p><h2>Настройки профиля</h2></div><span class="status" id="profileStatus" aria-live="polite"></span></div>
+        <form id="cabinetForm" class="cabinet-form">
+          <label>Имя<input id="displayName" name="displayName" maxlength="80" required></label>
+          <label>Город<input id="profileCity" name="city" maxlength="80" placeholder="Например, Туркестан"></label>
+          <label>Направление<input id="profileSpecialty" name="specialty" maxlength="120" placeholder="Например, IT и технологии"></label>
+          <label>Курс<select id="studyYear" name="studyYear"><option value="">Не указан</option><option value="1">1 курс</option><option value="2">2 курс</option><option value="3">3 курс</option><option value="4">4 курс</option><option value="5">5 курс</option><option value="6">6 курс</option><option value="7">7 курс</option><option value="8">8 курс</option></select></label>
+          <button class="save-button" type="submit">Сохранить изменения <span>→</span></button>
+        </form>
+      </section>
+
+      <aside class="cabinet-card saved-card">
+        <p class="section-label">СОХРАНЁННОЕ</p><h2>Избранное</h2><p class="saved-count"><b id="favoritesCount">—</b> сохранённых возможностей</p>
+        <div id="favoritesPreview" class="favorites-preview"><p>Загрузка избранного…</p></div>
+        <a href="index.html#feed" class="explore-link">Смотреть возможности →</a>
+      </aside>
+    </div>
+  </main>
+  <script src="profile-page.js"></script>
+</body>
+</html>

@@ -2,7 +2,7 @@ import { cp, mkdir, readFile, writeFile } from "node:fs/promises";
 
 const legacyFiles = [
   "index.html", "styles.css", "updates.css", "script.js", "profile.js", "login.js",
-  "counter.js", "selection.js", "assistant.js", "i18n.js", "checklist.js", "pages.css", "pages.js", "study.html",
+  "counter.js", "selection.js", "assistant.js", "i18n.js", "checklist.js", "pages.css", "pages.js", "profile-page.css", "profile-page.js", "profile.html", "study.html",
   "jobs.html", "housing.html", "events.html", "grants.html", "market.html", "community.html",
 ];
 const types = { ".html": "text/html; charset=utf-8", ".css": "text/css; charset=utf-8", ".js": "text/javascript; charset=utf-8" };

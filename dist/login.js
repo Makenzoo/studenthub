@@ -28,7 +28,7 @@ async function authRequest(url, body) {
 function setSignedIn(user) {
   const initial = (user.display_name || user.email || 'С').trim().charAt(0).toUpperCase();
   document.querySelector('#profileInitial').textContent = initial;
-  loginTrigger.querySelector('span:last-child').textContent = user.display_name || 'Профиль';
+  loginTrigger.querySelector('span:last-child').textContent = 'Мой кабинет';
   loginTrigger.dataset.signedIn = 'true';
 }
 
@@ -69,7 +69,10 @@ function setAuthMode(registering) {
 function openLogin() { loginDialog.hidden = false; document.body.style.overflow = 'hidden'; loginEmail.focus(); }
 function closeLogin() { loginDialog.hidden = true; document.body.style.overflow = ''; }
 
-loginTrigger.addEventListener('click', openLogin);
+loginTrigger.addEventListener('click', () => {
+  if (loginTrigger.dataset.signedIn === 'true') window.location.href = 'profile.html';
+  else openLogin();
+});
 loginDialog.querySelectorAll('[data-close-login]').forEach((element) => element.addEventListener('click', closeLogin));
 
 loginForm.addEventListener('submit', async (event) => {
@@ -105,3 +108,4 @@ authTabs.forEach((tab) => tab.addEventListener('click', () => setAuthMode(tab.da
 document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && !loginDialog.hidden) closeLogin(); });
 setAuthMode(false);
 restoreSession();
+if (new URLSearchParams(window.location.search).get('login') === '1') openLogin();
