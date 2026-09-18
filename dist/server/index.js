@@ -66,6 +66,14 @@ function passwordFrom(value) {
   return value;
 }
 
+function studyYearFrom(value) {
+  const raw = typeof value === "string" ? value.trim() : value == null ? "" : String(value);
+  if (raw === "") return null;
+  const year = Number(raw);
+  if (!Number.isInteger(year) || year < 1 || year > 5) throw new Error("Укажите курс от 1 до 5.");
+  return year;
+}
+
 function readCookie(request, name) {
   const match = request.headers.get("cookie")?.match(new RegExp(`(?:^|;\\s*)${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}=([^;]+)`));
   return match ? match[1] : null;
@@ -185,7 +193,7 @@ async function emailRegister(env, request) {
   const role = configuredAdminEmails(env).includes(email) ? "admin" : "student";
   await db.prepare("INSERT INTO users (id,email,display_name,role) VALUES (?,?,?,?)").bind(id, email, displayName, role).run();
   await db.prepare("INSERT INTO password_credentials (user_id,password_salt,password_hash,iterations) VALUES (?,?,?,?)").bind(id, salt, hash, 210000).run();
-  await db.prepare("INSERT INTO student_profiles (user_id,city,specialty,study_year) VALUES (?,?,?,?)").bind(id, text(body.city), text(body.specialty), Number(body.studyYear) || null).run();
+  await db.prepare("INSERT INTO student_profiles (user_id,city,specialty,study_year) VALUES (?,?,?,?)").bind(id, text(body.city), text(body.specialty), studyYearFrom(body.studyYear)).run();
   return json({ ok: true, user: { id, email, display_name: displayName, role } }, 201, { "set-cookie": await issueSession(env, id) });
 }
 
@@ -227,7 +235,7 @@ async function register(env, request) {
   const configuredAdmins = configuredAdminEmails(env);
   const role = configuredAdmins.includes(person.email.toLowerCase()) ? "admin" : "student";
   await db.prepare("INSERT INTO users (id,email,display_name,role) VALUES (?,?,?,?) ON CONFLICT(id) DO UPDATE SET email=excluded.email, display_name=excluded.display_name, role=CASE WHEN users.role='admin' THEN 'admin' ELSE excluded.role END, updated_at=CURRENT_TIMESTAMP").bind(person.id, person.email, displayName, role).run();
-  await db.prepare("INSERT INTO student_profiles (user_id,city,specialty,study_year) VALUES (?,?,?,?) ON CONFLICT(user_id) DO UPDATE SET city=excluded.city,specialty=excluded.specialty,study_year=excluded.study_year,updated_at=CURRENT_TIMESTAMP").bind(person.id, text(body.city), text(body.specialty), Number(body.studyYear) || null).run();
+  await db.prepare("INSERT INTO student_profiles (user_id,city,specialty,study_year) VALUES (?,?,?,?) ON CONFLICT(user_id) DO UPDATE SET city=excluded.city,specialty=excluded.specialty,study_year=excluded.study_year,updated_at=CURRENT_TIMESTAMP").bind(person.id, text(body.city), text(body.specialty), studyYearFrom(body.studyYear)).run();
   return json({ ok: true, role });
 }
 
@@ -235,7 +243,7 @@ async function profile(env, request) {
   const user = await requireRegistered(env, request); if (!user) return error("Сначала зарегистрируйте профиль.", 401);
   const db = requireDb(env);
   if (request.method === "GET") { const profile = await db.prepare("SELECT u.id,u.email,u.display_name,u.role,p.city,p.specialty,p.study_year FROM users u LEFT JOIN student_profiles p ON p.user_id=u.id WHERE u.id=?").bind(user.id).first(); return json({ profile }); }
-  const body = await request.json(); await db.prepare("UPDATE users SET display_name=?,updated_at=CURRENT_TIMESTAMP WHERE id=?").bind(text(body.displayName).slice(0,80),user.id).run(); await db.prepare("INSERT INTO student_profiles (user_id,city,specialty,study_year) VALUES (?,?,?,?) ON CONFLICT(user_id) DO UPDATE SET city=excluded.city,specialty=excluded.specialty,study_year=excluded.study_year,updated_at=CURRENT_TIMESTAMP").bind(user.id,text(body.city),text(body.specialty),Number(body.studyYear)||null).run(); return json({ ok:true });
+  const body = await request.json(); await db.prepare("UPDATE users SET display_name=?,updated_at=CURRENT_TIMESTAMP WHERE id=?").bind(text(body.displayName).slice(0,80),user.id).run(); await db.prepare("INSERT INTO student_profiles (user_id,city,specialty,study_year) VALUES (?,?,?,?) ON CONFLICT(user_id) DO UPDATE SET city=excluded.city,specialty=excluded.specialty,study_year=excluded.study_year,updated_at=CURRENT_TIMESTAMP").bind(user.id,text(body.city),text(body.specialty),studyYearFrom(body.studyYear)).run(); return json({ ok:true });
 }
 
 async function favorite(env, request) {

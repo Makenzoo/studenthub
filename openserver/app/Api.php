@@ -95,7 +95,7 @@ final class Api {
         $name = mb_substr(value($body, 'displayName', $user['display_name']), 0, 80);
         if ($name === '') json_response(['error' => 'Укажите имя.'], 422);
         $year = value($body, 'studyYear');
-        if ($year !== '' && (!ctype_digit($year) || (int)$year < 1 || (int)$year > 8)) json_response(['error' => 'Укажите курс от 1 до 8.'], 422);
+        if ($year !== '' && (!ctype_digit($year) || (int)$year < 1 || (int)$year > 5)) json_response(['error' => 'Укажите курс от 1 до 5.'], 422);
         db()->prepare('UPDATE users SET display_name = ? WHERE id = ?')->execute([$name, $user['id']]);
         db()->prepare('INSERT INTO student_profiles (user_id, city, university_name, specialty, study_year) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE city=VALUES(city), university_name=VALUES(university_name), specialty=VALUES(specialty), study_year=VALUES(study_year)')
             ->execute([$user['id'], value($body, 'city'), value($body, 'university'), value($body, 'specialty'), $year === '' ? null : (int)$year]);
