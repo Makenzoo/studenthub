@@ -27,6 +27,7 @@ CREATE TABLE student_profiles (
   user_id TEXT PRIMARY KEY NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   city TEXT,
   university_id INTEGER REFERENCES universities(id) ON DELETE SET NULL,
+  university_name TEXT,
   specialty TEXT,
   study_year INTEGER,
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP

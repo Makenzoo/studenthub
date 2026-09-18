@@ -22,6 +22,7 @@ function configuredAdminEmails(env) {
 
 const encoder = new TextEncoder();
 let emailAuthTables;
+let profileSchemaReady;
 
 function base64(bytes) {
   let output = "";
@@ -96,6 +97,16 @@ async function ensureEmailAuthTables(db) {
     CREATE INDEX IF NOT EXISTS idx_email_sessions_expiry ON email_sessions(expires_at);
   `);
   return emailAuthTables;
+}
+
+async function ensureProfileSchema(db) {
+  profileSchemaReady ||= (async () => {
+    const columns = await db.prepare("PRAGMA table_info(student_profiles)").all();
+    if (!(columns.results || []).some((column) => column.name === "university_name")) {
+      await db.exec("ALTER TABLE student_profiles ADD COLUMN university_name TEXT");
+    }
+  })();
+  return profileSchemaReady;
 }
 
 async function sessionUser(env, request) {
@@ -181,6 +192,7 @@ async function detail(env, type, slug) {
 async function emailRegister(env, request) {
   const db = requireDb(env);
   await ensureEmailAuthTables(db);
+  await ensureProfileSchema(db);
   const body = await request.json();
   const email = emailFrom(body.email);
   const password = passwordFrom(body.password);
@@ -193,7 +205,7 @@ async function emailRegister(env, request) {
   const role = configuredAdminEmails(env).includes(email) ? "admin" : "student";
   await db.prepare("INSERT INTO users (id,email,display_name,role) VALUES (?,?,?,?)").bind(id, email, displayName, role).run();
   await db.prepare("INSERT INTO password_credentials (user_id,password_salt,password_hash,iterations) VALUES (?,?,?,?)").bind(id, salt, hash, 210000).run();
-  await db.prepare("INSERT INTO student_profiles (user_id,city,specialty,study_year) VALUES (?,?,?,?)").bind(id, text(body.city), text(body.specialty), studyYearFrom(body.studyYear)).run();
+  await db.prepare("INSERT INTO student_profiles (user_id,city,university_name,specialty,study_year) VALUES (?,?,?,?,?)").bind(id, text(body.city), text(body.university), text(body.specialty), studyYearFrom(body.studyYear)).run();
   return json({ ok: true, user: { id, email, display_name: displayName, role } }, 201, { "set-cookie": await issueSession(env, id) });
 }
 
@@ -231,19 +243,19 @@ async function stats(env) {
 
 async function register(env, request) {
   const person = identity(request); if (!person) return error("Войдите через ChatGPT, чтобы создать профиль.", 401);
-  const db = requireDb(env); const body = await request.json(); const displayName = text(body.displayName, person.name).slice(0, 80) || person.email;
+  const db = requireDb(env); await ensureProfileSchema(db); const body = await request.json(); const displayName = text(body.displayName, person.name).slice(0, 80) || person.email;
   const configuredAdmins = configuredAdminEmails(env);
   const role = configuredAdmins.includes(person.email.toLowerCase()) ? "admin" : "student";
   await db.prepare("INSERT INTO users (id,email,display_name,role) VALUES (?,?,?,?) ON CONFLICT(id) DO UPDATE SET email=excluded.email, display_name=excluded.display_name, role=CASE WHEN users.role='admin' THEN 'admin' ELSE excluded.role END, updated_at=CURRENT_TIMESTAMP").bind(person.id, person.email, displayName, role).run();
-  await db.prepare("INSERT INTO student_profiles (user_id,city,specialty,study_year) VALUES (?,?,?,?) ON CONFLICT(user_id) DO UPDATE SET city=excluded.city,specialty=excluded.specialty,study_year=excluded.study_year,updated_at=CURRENT_TIMESTAMP").bind(person.id, text(body.city), text(body.specialty), studyYearFrom(body.studyYear)).run();
+  await db.prepare("INSERT INTO student_profiles (user_id,city,university_name,specialty,study_year) VALUES (?,?,?,?,?) ON CONFLICT(user_id) DO UPDATE SET city=excluded.city,university_name=excluded.university_name,specialty=excluded.specialty,study_year=excluded.study_year,updated_at=CURRENT_TIMESTAMP").bind(person.id, text(body.city), text(body.university), text(body.specialty), studyYearFrom(body.studyYear)).run();
   return json({ ok: true, role });
 }
 
 async function profile(env, request) {
   const user = await requireRegistered(env, request); if (!user) return error("Сначала зарегистрируйте профиль.", 401);
-  const db = requireDb(env);
-  if (request.method === "GET") { const profile = await db.prepare("SELECT u.id,u.email,u.display_name,u.role,p.city,p.specialty,p.study_year FROM users u LEFT JOIN student_profiles p ON p.user_id=u.id WHERE u.id=?").bind(user.id).first(); return json({ profile }); }
-  const body = await request.json(); await db.prepare("UPDATE users SET display_name=?,updated_at=CURRENT_TIMESTAMP WHERE id=?").bind(text(body.displayName).slice(0,80),user.id).run(); await db.prepare("INSERT INTO student_profiles (user_id,city,specialty,study_year) VALUES (?,?,?,?) ON CONFLICT(user_id) DO UPDATE SET city=excluded.city,specialty=excluded.specialty,study_year=excluded.study_year,updated_at=CURRENT_TIMESTAMP").bind(user.id,text(body.city),text(body.specialty),studyYearFrom(body.studyYear)).run(); return json({ ok:true });
+  const db = requireDb(env); await ensureProfileSchema(db);
+  if (request.method === "GET") { const profile = await db.prepare("SELECT u.id,u.email,u.display_name,u.role,p.city,p.university_name,p.specialty,p.study_year FROM users u LEFT JOIN student_profiles p ON p.user_id=u.id WHERE u.id=?").bind(user.id).first(); return json({ profile }); }
+  const body = await request.json(); await db.prepare("UPDATE users SET display_name=?,updated_at=CURRENT_TIMESTAMP WHERE id=?").bind(text(body.displayName).slice(0,80),user.id).run(); await db.prepare("INSERT INTO student_profiles (user_id,city,university_name,specialty,study_year) VALUES (?,?,?,?,?) ON CONFLICT(user_id) DO UPDATE SET city=excluded.city,university_name=excluded.university_name,specialty=excluded.specialty,study_year=excluded.study_year,updated_at=CURRENT_TIMESTAMP").bind(user.id,text(body.city),text(body.university),text(body.specialty),studyYearFrom(body.studyYear)).run(); return json({ ok:true });
 }
 
 async function favorite(env, request) {

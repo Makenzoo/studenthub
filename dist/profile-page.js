@@ -9,6 +9,7 @@ const api = async (url, options) => {
 function setProfile(profile) {
   $('#displayName').value = profile.display_name || '';
   $('#profileCity').value = profile.city || '';
+  $('#profileUniversity').value = profile.university_name || '';
   $('#profileSpecialty').value = profile.specialty || '';
   $('#studyYear').value = profile.study_year || '';
   const name = profile.display_name || profile.email || 'Студент';
