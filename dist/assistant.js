@@ -3,44 +3,75 @@ const assistantTrigger = document.querySelector('#aiAssistantTrigger');
 const assistantForm = document.querySelector('#aiAssistantForm');
 const assistantInput = document.querySelector('#aiAssistantInput');
 const assistantMessages = document.querySelector('#aiMessages');
+const assistantStatus = document.querySelector('#aiStatus');
+const assistantHistory = [];
 
-const assistantTopics = [
-  { words: ['стаж', 'работ', 'ваканс', 'резюме'], text: 'Для первого опыта посмотрите стажировки и вакансии для студентов. Укажите город и направление в подборке, чтобы сузить поиск.', link: 'jobs.html', label: 'Открыть вакансии' },
-  { words: ['грант', 'стипенд', 'финанс', 'дедлайн'], text: 'В разделе грантов собраны стипендии, программы и дедлайны. Перед подачей проверьте требования и список документов.', link: 'grants.html', label: 'Открыть гранты' },
-  { words: ['жиль', 'общежит', 'комнат', 'сосед', 'аренд'], text: 'В разделе жилья можно посмотреть общежития, комнаты и объявления о совместной аренде.', link: 'housing.html', label: 'Открыть жильё' },
-  { words: ['меропр', 'хакат', 'олимпиад', 'конферен', 'событ'], text: 'Откройте мероприятия, чтобы выбрать хакатоны, олимпиады и конференции. Смотрите даты и формат участия.', link: 'events.html', label: 'Открыть события' },
-  { words: ['учёб', 'учеб', 'конспект', 'курс', 'материал', 'репетитор'], text: 'В разделе учёбы доступны конспекты, курсы, учебные материалы и поиск репетитора.', link: 'study.html', label: 'Открыть учёбу' },
-  { words: ['универс', 'город', 'направлен', 'специальност'], text: 'Выберите город, университет и направление в персональной подборке на главной. После этого сайт покажет более подходящие варианты.', link: '#finder', label: 'Настроить подборку' }
-];
+function scrollMessages() {
+  assistantMessages.scrollTop = assistantMessages.scrollHeight;
+}
 
-function appendMessage(role, text, link) {
+function appendMessage(role, content, action) {
   const message = document.createElement('article');
   message.className = `ai-message ai-message-${role}`;
   const sender = document.createElement('b');
   sender.textContent = role === 'user' ? 'Вы' : 'StudentHub AI';
-  const content = document.createElement('p');
-  content.textContent = text;
-  message.append(sender, content);
-  if (link) {
-    const anchor = document.createElement('a');
-    anchor.href = link.link;
-    anchor.textContent = `${link.label} →`;
-    message.append(anchor);
+  const text = document.createElement('p');
+  text.textContent = content;
+  message.append(sender, text);
+  if (action?.href && action?.label) {
+    const link = document.createElement('a');
+    link.href = action.href;
+    link.textContent = `${action.label} →`;
+    message.append(link);
   }
   assistantMessages.append(message);
-  assistantMessages.scrollTop = assistantMessages.scrollHeight;
+  scrollMessages();
 }
 
-function respond(question) {
+function setTyping(visible) {
+  let indicator = assistantMessages.querySelector('.ai-typing');
+  if (!visible) return indicator?.remove();
+  if (indicator) return;
+  indicator = document.createElement('div');
+  indicator.className = 'ai-typing';
+  indicator.setAttribute('aria-label', 'Ассистент печатает');
+  indicator.innerHTML = '<i></i><i></i><i></i>';
+  assistantMessages.append(indicator);
+  scrollMessages();
+}
+
+function setBusy(busy) {
+  assistantInput.disabled = busy;
+  assistantForm.querySelector('button').disabled = busy;
+  if (busy) assistantStatus.innerHTML = '<span class="ai-online">●</span> Подбираю ответ…';
+}
+
+async function respond(question) {
   appendMessage('user', question);
-  const normalized = question.toLowerCase();
-  const topic = assistantTopics.find((item) => item.words.some((word) => normalized.includes(word)));
-  if (topic) {
-    appendMessage('bot', topic.text, topic);
-    return;
+  assistantHistory.push({ role: 'user', content: question });
+  setBusy(true);
+  setTyping(true);
+  try {
+    const response = await fetch('/api/assistant', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ messages: assistantHistory.slice(-8) }),
+    });
+    if (!response.ok) throw new Error('Assistant unavailable');
+    const answer = await response.json();
+    appendMessage('bot', answer.reply, answer.action);
+    assistantHistory.push({ role: 'assistant', content: answer.reply });
+    assistantStatus.innerHTML = `<span class="ai-online">●</span> ${answer.mode === 'ai' ? 'AI-помощник в диалоге' : 'Помощник по разделам StudentHub'}`;
+  } catch {
+    const fallback = 'Сейчас не удалось связаться с помощником. Попробуйте ещё раз или откройте нужный раздел — там есть проверенные источники.';
+    appendMessage('bot', fallback);
+    assistantHistory.push({ role: 'assistant', content: fallback });
+    assistantStatus.innerHTML = '<span class="ai-online">●</span> Доступна навигация по разделам';
+  } finally {
+    setTyping(false);
+    setBusy(false);
+    assistantInput.focus();
   }
-  const city = document.querySelector('#city')?.value || 'вашем городе';
-  appendMessage('bot', `Я помогу с учебой, работой, жильём, грантами и событиями. Сейчас для вас выбран город ${city}. Попробуйте спросить, например: «Найди стажировку» или «Какие есть гранты?»`);
 }
 
 function openAssistant() {
@@ -60,9 +91,14 @@ assistantDialog.querySelectorAll('[data-ai-prompt]').forEach((button) => button.
 assistantForm.addEventListener('submit', (event) => {
   event.preventDefault();
   const question = assistantInput.value.trim();
-  if (!question) return;
-  respond(question);
+  if (!question || assistantInput.disabled) return;
   assistantInput.value = '';
+  assistantInput.style.height = '';
+  respond(question);
+});
+assistantInput.addEventListener('input', () => {
+  assistantInput.style.height = '';
+  assistantInput.style.height = `${Math.min(assistantInput.scrollHeight, 100)}px`;
 });
 assistantInput.addEventListener('keydown', (event) => {
   if (event.key === 'Enter' && !event.shiftKey) {
