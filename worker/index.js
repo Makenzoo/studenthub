@@ -241,6 +241,97 @@ async function stats(env) {
   return json({ registeredUsers: Number(count?.count || 0) });
 }
 
+async function homeSummary(env) {
+  const db = requireDb(env);
+  const [jobs, grants, housing] = await Promise.all([
+    db.prepare("SELECT COUNT(*) AS count, MAX(checked_at) AS checked_at FROM jobs WHERE is_published=1").first(),
+    db.prepare("SELECT COUNT(*) AS count, MAX(checked_at) AS checked_at FROM grants WHERE is_published=1").first(),
+    db.prepare("SELECT COUNT(*) AS count, MAX(checked_at) AS checked_at FROM housing_listings WHERE is_published=1").first(),
+  ]);
+  return json({
+    items: {
+      jobs: { count: Number(jobs?.count || 0), checkedAt: jobs?.checked_at || null },
+      grants: { count: Number(grants?.count || 0), checkedAt: grants?.checked_at || null },
+      housing: { count: Number(housing?.count || 0), checkedAt: housing?.checked_at || null },
+    },
+  });
+}
+
+async function notifications(env, request) {
+  const user = await requireRegistered(env, request);
+  if (!user) return json({ items: [], profileReady: false, loginRequired: true });
+  const db = requireDb(env);
+  await ensureProfileSchema(db);
+  const profile = await db.prepare("SELECT specialty FROM student_profiles WHERE user_id=?").bind(user.id).first();
+  const specialty = text(profile?.specialty);
+  if (!specialty) return json({ items: [], profileReady: false, loginRequired: false });
+  const term = `%${specialty.toLowerCase()}%`;
+  const matches = "(specialty IS NULL OR specialty='' OR lower(specialty) LIKE ?)";
+  const [deadlineRows, newRows] = await Promise.all([
+    db.prepare(`SELECT id,title,deadline,specialty FROM grants WHERE is_published=1 AND ${matches} AND date(deadline) BETWEEN date('now') AND date('now','+3 days') ORDER BY date(deadline) ASC LIMIT 5`).bind(term).all(),
+    db.prepare(`SELECT id,title,deadline,specialty FROM grants WHERE is_published=1 AND ${matches} AND datetime(created_at)>=datetime('now','-7 days') ORDER BY datetime(created_at) DESC LIMIT 5`).bind(term).all(),
+  ]);
+  const notices = new Map();
+  for (const grant of deadlineRows.results || []) notices.set(`deadline-${grant.id}`, { kind: "deadline", title: grant.title, deadline: grant.deadline, href: "grants.html" });
+  for (const grant of newRows.results || []) notices.set(`new-${grant.id}`, { kind: "new", title: grant.title, deadline: grant.deadline, href: "grants.html" });
+  return json({ items: [...notices.values()], profileReady: true, loginRequired: false });
+}
+
+function assistantFallback(question, profile) {
+  const normalized = question.toLowerCase();
+  const city = profile?.city || "вашем городе";
+  if (/стаж|ваканс|работ|резюме/.test(normalized)) return { reply: `Начните со стажировок и позиций с частичной занятостью в ${city}. В карточке вакансии проверьте дедлайн и ссылку на источник, а перед откликом подготовьте резюме на одну страницу.`, action: { label: "Открыть вакансии", href: "jobs.html" } };
+  if (/грант|стипенд|финанс|дедлайн/.test(normalized)) return { reply: "Для гранта сначала сопоставьте направление, требования и дедлайн. Не отправляйте документы только по пересказам — открывайте официальную страницу программы и фиксируйте дату проверки.", action: { label: "Открыть гранты", href: "grants.html" } };
+  if (/жиль|общежит|комнат|сосед|аренд/.test(normalized)) return { reply: `Для жилья в ${city} сравните район, ежемесячную стоимость и условия заселения. Не переводите деньги до просмотра и подтверждения контакта владельца.`, action: { label: "Открыть жильё", href: "housing.html" } };
+  if (/меропр|хакат|олимпиад|конферен|событ/.test(normalized)) return { reply: "Ищите события с понятной датой, форматом и ссылкой на организатора. Для хакатона заранее проверьте размер команды, дедлайн регистрации и требования к участникам.", action: { label: "Открыть события", href: "events.html" } };
+  if (/учеб|курс|конспект|материал|экзамен|репетитор/.test(normalized)) return { reply: "Могу помочь составить план подготовки: назовите предмет, курс и дату экзамена. Для начала выберите один источник теории и добавьте практику короткими ежедневными блоками.", action: { label: "Открыть учёбу", href: "study.html" } };
+  return { reply: "Я помогу выбрать следующий шаг по учёбе, работе, грантам, жилью или событиям. Напишите цель, город и срок — тогда предложу более точный план.", action: null };
+}
+
+function assistantOutput(payload) {
+  if (typeof payload?.output_text === "string" && payload.output_text.trim()) return payload.output_text.trim();
+  const message = (payload?.output || []).find((item) => item.type === "message");
+  const textPart = message?.content?.find((item) => item.type === "output_text");
+  return text(textPart?.text);
+}
+
+async function assistant(env, request) {
+  const body = await request.json();
+  const messages = Array.isArray(body.messages) ? body.messages.slice(-8) : [];
+  const cleaned = messages.map((item) => ({
+    role: item?.role === "assistant" ? "assistant" : "user",
+    content: text(item?.content).slice(0, 1000),
+  })).filter((item) => item.content);
+  const latest = [...cleaned].reverse().find((item) => item.role === "user");
+  if (!latest) return error("Напишите вопрос для ассистента.");
+
+  let profile = null;
+  try {
+    const user = await requireRegistered(env, request);
+    if (user) profile = await requireDb(env).prepare("SELECT city, university_name, specialty, study_year FROM student_profiles WHERE user_id=?").bind(user.id).first();
+  } catch { /* The assistant remains useful when the optional profile store is unavailable. */ }
+
+  const fallback = assistantFallback(latest.content, profile);
+  if (!text(env.OPENAI_API_KEY)) return json({ ...fallback, mode: "guide" });
+
+  const profileLine = profile ? `Профиль: город ${profile.city || "не указан"}; вуз ${profile.university_name || "не указан"}; направление ${profile.specialty || "не указано"}; курс ${profile.study_year || "не указан"}.` : "Профиль студента не заполнен.";
+  const transcript = cleaned.map((item) => `${item.role === "assistant" ? "Ассистент" : "Студент"}: ${item.content}`).join("\n");
+  const response = await fetch("https://api.openai.com/v1/responses", {
+    method: "POST",
+    headers: { "content-type": "application/json", authorization: `Bearer ${env.OPENAI_API_KEY}` },
+    body: JSON.stringify({
+      model: text(env.OPENAI_MODEL) || "gpt-5.6-luna",
+      store: false,
+      max_output_tokens: 380,
+      instructions: "Ты StudentHub AI — доброжелательный помощник для студентов Казахстана. Отвечай только по-русски, конкретно и кратко: 2–4 коротких абзаца или список. Помогай с учебой, стажировками, грантами, жильём и событиями. Не выдумывай вакансии, дедлайны, суммы, ссылки или правила; если нужна актуальная информация, предложи открыть соответствующий раздел или официальный источник. Не давай юридических, медицинских или финансовых гарантий. " + profileLine,
+      input: transcript,
+    }),
+  });
+  if (!response.ok) return json({ ...fallback, mode: "guide" });
+  const answer = assistantOutput(await response.json());
+  return json({ reply: answer || fallback.reply, action: fallback.action, mode: answer ? "ai" : "guide" });
+}
+
 async function register(env, request) {
   const person = identity(request); if (!person) return error("Войдите через ChatGPT, чтобы создать профиль.", 401);
   const db = requireDb(env); await ensureProfileSchema(db); const body = await request.json(); const displayName = text(body.displayName, person.name).slice(0, 80) || person.email;
@@ -292,4 +383,4 @@ function serveStaticAsset(request) {
   return new Response(bytes, { headers: { "content-type": asset.contentType } });
 }
 
-export default { async fetch(request, env) { const url=new URL(request.url); try { if(url.pathname==="/api/session") return json({user:await userFor(env,request)}); if(url.pathname==="/api/auth/session") return authSession(env,request); if(url.pathname==="/api/auth/register"&&request.method==="POST") return emailRegister(env,request); if(url.pathname==="/api/auth/login"&&request.method==="POST") return emailLogin(env,request); if(url.pathname==="/api/auth/logout"&&request.method==="POST") return emailLogout(env,request); if(url.pathname==="/api/stats") return stats(env); if(url.pathname==="/api/register"&&request.method==="POST") return register(env,request); if(url.pathname==="/api/profile") return profile(env,request); if(url.pathname==="/api/favorites"&&request.method==="GET") return favorites(env,request); if(url.pathname==="/api/favorites"&&request.method==="POST") return favorite(env,request); const m=url.pathname.match(/^\/api\/catalog\/(universities|university|grants|grant)(?:\/([a-z0-9-]+))?$/); if(m&&request.method==="GET"){const type=m[1].startsWith("university")?"university":"grant";return m[2]?detail(env,type,m[2]):catalog(env,type,request);} if(url.pathname==="/api/admin/catalog") return adminCatalog(env,request); const a=url.pathname.match(/^\/api\/admin\/(university|grant)$/); if(a&&request.method==="POST") return saveAdmin(env,request,a[1]); if(request.method!=="GET") return error("Не найдено.",404); const asset=serveStaticAsset(request); if(asset) return asset; return new Response(documentPage(url.pathname),{headers:{"content-type":"text/html; charset=utf-8"}}); } catch(e) { return error(e instanceof Error?e.message:"Сервис временно недоступен.",503); } } };
+export default { async fetch(request, env) { const url=new URL(request.url); try { if(url.pathname==="/api/session") return json({user:await userFor(env,request)}); if(url.pathname==="/api/auth/session") return authSession(env,request); if(url.pathname==="/api/auth/register"&&request.method==="POST") return emailRegister(env,request); if(url.pathname==="/api/auth/login"&&request.method==="POST") return emailLogin(env,request); if(url.pathname==="/api/auth/logout"&&request.method==="POST") return emailLogout(env,request); if(url.pathname==="/api/stats") return stats(env); if(url.pathname==="/api/home-summary") return homeSummary(env); if(url.pathname==="/api/notifications") return notifications(env,request); if(url.pathname==="/api/assistant"&&request.method==="POST") return assistant(env,request); if(url.pathname==="/api/register"&&request.method==="POST") return register(env,request); if(url.pathname==="/api/profile") return profile(env,request); if(url.pathname==="/api/favorites"&&request.method==="GET") return favorites(env,request); if(url.pathname==="/api/favorites"&&request.method==="POST") return favorite(env,request); const m=url.pathname.match(/^\/api\/catalog\/(universities|university|grants|grant)(?:\/([a-z0-9-]+))?$/); if(m&&request.method==="GET"){const type=m[1].startsWith("university")?"university":"grant";return m[2]?detail(env,type,m[2]):catalog(env,type,request);} if(url.pathname==="/api/admin/catalog") return adminCatalog(env,request); const a=url.pathname.match(/^\/api\/admin\/(university|grant)$/); if(a&&request.method==="POST") return saveAdmin(env,request,a[1]); if(request.method!=="GET") return error("Не найдено.",404); const asset=serveStaticAsset(request); if(asset) return asset; return new Response(documentPage(url.pathname),{headers:{"content-type":"text/html; charset=utf-8"}}); } catch(e) { return error(e instanceof Error?e.message:"Сервис временно недоступен.",503); } } };
