@@ -14,7 +14,7 @@
   <header class="topbar">
     <a class="brand" href="#top" aria-label="StudentHub KZ"><span class="brand-mark">S</span><span>StudentHub <b>KZ</b></span></a>
     <nav aria-label="Основная навигация"><a href="#opportunities" data-i18n="navOpportunities">Возможности</a><a href="#feed" data-i18n="navFeed">Подборки</a><a href="#community" data-i18n="navCommunity">Сообщество</a></nav>
-    <div class="top-actions"><button class="lang-toggle" type="button" aria-label="Switch language">KZ</button><button class="profile" id="profileTrigger" type="button" aria-haspopup="dialog"><span class="avatar" id="profileInitial">→</span><span>Войти</span></button></div>
+    <div class="top-actions"><button class="lang-toggle" type="button" aria-label="Switch language">KZ</button><button class="notifications-trigger" id="notificationsTrigger" type="button" aria-haspopup="dialog" aria-label="Уведомления"><span aria-hidden="true">♢</span><b id="notificationsBadge" hidden>0</b></button><button class="profile" id="profileTrigger" type="button" aria-haspopup="dialog"><span class="avatar" id="profileInitial">→</span><span>Войти</span></button></div>
   </header>
 
   <main id="top">
@@ -23,7 +23,7 @@
         <p class="eyebrow"><span></span><span data-i18n="eyebrow">Платформа для студентов Казахстана</span></p>
         <h1 id="hero-title" data-i18n="title">Всё для студенческой жизни — <em>в одном месте.</em></h1>
         <p class="hero-text" data-i18n="intro">Учёба, первая работа, жильё, гранты и события — находите то, что подходит именно вам.</p>
-        <div class="hero-actions"><a href="#finder" class="primary" data-i18n="find">Найти для себя <span>→</span></a><button class="play" type="button"><i>▶</i><span data-i18n="howItWorks">Как это работает</span></button></div>
+        <div class="hero-actions"><a href="#finder" class="primary" data-i18n="find">Найти для себя <span>→</span></a></div>
         <div class="people"><div class="faces"><span>А</span><span>Н</span><span>М</span><span>+</span></div><p><strong id="registeredUsers">0</strong> <span id="registeredUsersLabel">зарегистрированных пользователей</span></p></div>
       </div>
       <div class="hero-visual" aria-label="Панель возможностей StudentHub">
@@ -48,12 +48,12 @@
     <section class="opportunities" id="opportunities" aria-labelledby="opportunities-title">
       <div class="section-head"><div><p class="section-label" data-i18n="everything">ВСЁ НУЖНОЕ</p><h2 id="opportunities-title" data-i18n="opportunitiesTitle">Выбирайте свой путь</h2></div><a href="#feed" data-i18n="allSections">Все разделы <span>→</span></a></div>
       <div class="feature-grid">
-        <a class="feature-card violet" href="study.html"><div class="icon">🎓</div><h3 data-i18n="study">Учёба</h3><p data-i18n="studyText">Конспекты, курсы, материалы и репетиторы.</p><span>1 240 <span data-i18n="materials">материалов</span></span></a>
-        <a class="feature-card blue" href="jobs.html"><div class="icon">💼</div><h3 data-i18n="jobs">Работа</h3><p data-i18n="jobsText">Вакансии и стажировки для первого опыта.</p><span>86 <span data-i18n="vacancies">вакансий</span></span></a>
-        <a class="feature-card pink" href="housing.html"><div class="icon">⌂</div><h3 data-i18n="housing">Жильё</h3><p data-i18n="housingText">Общежития, комнаты и поиск соседа.</p><span>54 <span data-i18n="listings">объявления</span></span></a>
-        <a class="feature-card orange" href="events.html"><div class="icon">✦</div><h3 data-i18n="events">Мероприятия</h3><p data-i18n="eventsText">Хакатоны, олимпиады и конференции.</p><span>28 <span data-i18n="thisMonth">в этом месяце</span></span></a>
-        <a class="feature-card green" href="grants.html"><div class="icon">₸</div><h3 data-i18n="grants">Гранты</h3><p data-i18n="grantsText">Стипендии, программы и дедлайны.</p><span>17 <span data-i18n="open">открыты</span></span></a>
-        <a class="feature-card cyan" href="market.html"><div class="icon">↔</div><h3 data-i18n="market">Обмен</h3><p data-i18n="marketText">Книги, техника и вещи от студентов.</p><span>312 <span data-i18n="offers">предложений</span></span></a>
+        <a class="feature-card violet" href="study.html"><div class="icon">🎓</div><h3 data-i18n="study">Учёба</h3><p>Открытые курсы, академические календари и проверенные материалы для самостоятельной подготовки.</p><span>Учебный навигатор</span></a>
+        <a class="feature-card blue" href="jobs.html" data-summary-type="jobs"><div class="icon">💼</div><h3 data-i18n="jobs">Работа</h3><p>Стажировки и первые вакансии из проверенного каталога.</p><span class="live-summary">Проверяем актуальные записи…</span></a>
+        <a class="feature-card pink" href="housing.html" data-summary-type="housing"><div class="icon">⌂</div><h3 data-i18n="housing">Жильё</h3><p>Общежития, комнаты и безопасный поиск соседа.</p><span class="live-summary">Проверяем актуальные записи…</span></a>
+        <a class="feature-card orange" href="events.html"><div class="icon">✦</div><h3 data-i18n="events">Мероприятия</h3><p>Анонсы вузов, хакатоны, олимпиады и карьерные события по Казахстану.</p><span>Следите за датами организаторов</span></a>
+        <a class="feature-card green" href="grants.html" data-summary-type="grants"><div class="icon">₸</div><h3 data-i18n="grants">Гранты</h3><p>Стипендии и образовательные программы с дедлайнами и первоисточниками.</p><span class="live-summary">Проверяем актуальные записи…</span></a>
+        <a class="feature-card cyan" href="market.html"><div class="icon">↔</div><h3 data-i18n="market">Обмен</h3><p>Учебники, техника и вещи от студентов — только с понятным описанием сделки.</p><span>Обмен между студентами</span></a>
       </div>
     </section>
 
@@ -142,12 +142,20 @@
       </form>
     </section>
   </div>
+  <div class="profile-dialog" id="notificationsDialog" role="dialog" aria-modal="true" aria-labelledby="notificationsTitle" hidden>
+    <div class="profile-backdrop" data-close-notifications></div>
+    <section class="notifications-panel">
+      <button class="dialog-close" type="button" data-close-notifications aria-label="Закрыть">×</button>
+      <div class="notifications-head"><div class="notifications-icon" aria-hidden="true">♢</div><div><p class="section-label">ОБНОВЛЕНИЯ</p><h2 id="notificationsTitle">Ваши уведомления</h2><p>Гранты и дедлайны для вашего направления.</p></div></div>
+      <div class="notifications-list" id="notificationsList" aria-live="polite"><p class="notification-empty">Загружаем уведомления…</p></div>
+    </section>
+  </div>
   <button class="ai-trigger" id="aiAssistantTrigger" type="button" aria-haspopup="dialog"><span aria-hidden="true">✦</span><span>AI Ассистент</span></button>
   <div class="profile-dialog" id="aiAssistantDialog" role="dialog" aria-modal="true" aria-labelledby="aiAssistantTitle" hidden>
     <div class="profile-backdrop" data-close-ai></div>
     <section class="ai-panel">
       <button class="dialog-close" type="button" data-close-ai aria-label="Закрыть">×</button>
-      <header class="ai-head"><div class="ai-avatar" aria-hidden="true">✦</div><div><p class="section-label">STUDENTHUB AI</p><h2 id="aiAssistantTitle">Чем помочь?</h2><p><span class="ai-online">●</span> Онлайн · ответы не сохраняются</p></div></header>
+      <header class="ai-head"><div class="ai-avatar" aria-hidden="true">✦</div><div><p class="section-label">STUDENTHUB AI</p><h2 id="aiAssistantTitle">Чем помочь?</h2><p id="aiStatus"><span class="ai-online">●</span> Поможет с планом и подборкой возможностей</p></div></header>
       <div class="ai-messages" id="aiMessages" role="log" aria-live="polite" aria-label="Диалог с ассистентом">
         <article class="ai-message ai-message-bot"><b>StudentHub AI</b><p>Помогу найти стажировку, грант, жильё, мероприятие или учебные материалы. С чего начнём?</p></article>
       </div>
@@ -164,8 +172,9 @@
   <script src="login.js"></script>
   <script src="counter.js"></script>
   <script src="selection.js"></script>
+  <script src="opportunity-summary.js"></script>
+  <script src="notifications.js"></script>
   <script src="assistant.js"></script>
   <script src="checklist.js?v=20260917-1"></script>
 </body>
 </html>
-
