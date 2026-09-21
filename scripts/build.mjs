@@ -2,8 +2,8 @@ import { cp, mkdir, readFile, writeFile } from "node:fs/promises";
 
 const legacyFiles = [
   "index.html", "styles.css", "updates.css", "script.js", "profile.js", "login.js",
-  "counter.js", "selection.js", "assistant.js", "i18n.js", "checklist.js", "pages.css", "pages.js", "profile-page.css", "profile-page.js", "profile.html", "study.html",
-  "jobs.html", "housing.html", "events.html", "grants.html", "market.html", "community.html",
+  "counter.js", "selection.js", "opportunity-summary.js", "notifications.js", "assistant.js", "i18n.js", "checklist.js", "pages.css", "pages.js", "profile-page.css", "profile-page.js", "profile.html", "study.html",
+  "jobs.html", "housing.html", "events.html", "grants.html", "market.html", "community.html", "community.js",
 ];
 const types = { ".html": "text/html; charset=utf-8", ".css": "text/css; charset=utf-8", ".js": "text/javascript; charset=utf-8" };
 const assets = Object.fromEntries(await Promise.all(legacyFiles.map(async (file) => {
