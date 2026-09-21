@@ -1,1 +1,36 @@
-<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Сообщество — StudentHub KZ</title><link rel="stylesheet" href="pages.css"></head><body><header class="page-header"><a class="brand" href="index.html"><span>S</span>StudentHub KZ</a><a class="back" href="index.html">← На главную</a></header><main class="page-main"><p class="eyebrow">СООБЩЕСТВО</p><h1>Обсуждения студентов</h1><p class="lead">Задавайте вопросы, делитесь опытом и находите людей с похожими целями.</p><form class="discussion-form" id="discussionForm"><input id="discussionInput" placeholder="О чём хотите спросить?" required><button>Создать тему</button></form><section id="topics"><article class="topic"><b>Где найти хорошую стажировку после 2 курса?</b><p>24 ответа · 67 реакций · Student Talks</p></article><article class="topic"><b>Кто ищет соседа для аренды в Алматы?</b><p>12 ответов · 31 реакция · Жильё</p></article><article class="topic"><b>Как подготовиться к Erasmus+?</b><p>18 ответов · 44 реакции · Обмен</p></article></section></main><script>document.querySelector('#discussionForm').addEventListener('submit',e=>{e.preventDefault();const input=document.querySelector('#discussionInput');const topic=document.createElement('article');topic.className='topic';topic.innerHTML='<b>'+input.value.replace(/[<>&]/g,'')+'</b><p>Новая тема · 0 ответов · Student Talks</p>';document.querySelector('#topics').prepend(topic);input.value=''})</script></body></html>
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Сообщество — StudentHub KZ</title>
+  <link rel="stylesheet" href="pages.css">
+</head>
+<body>
+  <header class="page-header"><a class="brand" href="index.html"><span>S</span>StudentHub KZ</a><a class="back" href="index.html">← На главную</a></header>
+  <main class="page-main">
+    <p class="eyebrow">СООБЩЕСТВО</p>
+    <h1>Обсуждения студентов</h1>
+    <p class="lead">Задавайте вопросы, делитесь опытом и находите людей с похожими целями.</p>
+    <form class="discussion-form" id="discussionForm"><label class="sr-only" for="discussionInput">Новая тема</label><input id="discussionInput" maxlength="180" placeholder="О чём хотите спросить?" required><button>Создать тему</button></form>
+    <section id="topics" aria-label="Темы сообщества">
+      <button class="topic" type="button" data-topic="internship"><b>Где найти хорошую стажировку после 2 курса?</b><p>24 ответа · 67 реакций · Student Talks</p></button>
+      <button class="topic" type="button" data-topic="housing"><b>Кто ищет соседа для аренды в Алматы?</b><p>12 ответов · 31 реакция · Жильё</p></button>
+      <button class="topic" type="button" data-topic="erasmus"><b>Как подготовиться к Erasmus+?</b><p>18 ответов · 44 реакции · Обмен</p></button>
+    </section>
+  </main>
+  <div class="topic-dialog" id="topicDialog" role="dialog" aria-modal="true" aria-labelledby="topicDialogTitle" hidden>
+    <button class="topic-dialog-backdrop" type="button" aria-label="Закрыть обсуждение" data-close-topic></button>
+    <section class="topic-panel">
+      <button class="topic-close" type="button" aria-label="Закрыть" data-close-topic>×</button>
+      <p class="eyebrow" id="topicDialogCategory"></p>
+      <h2 id="topicDialogTitle"></h2>
+      <p class="topic-dialog-meta" id="topicDialogMeta"></p>
+      <div class="replies" id="topicReplies" aria-live="polite"></div>
+      <form class="reply-form" id="replyForm"><label class="sr-only" for="replyInput">Ваш ответ</label><textarea id="replyInput" rows="3" maxlength="700" placeholder="Поделитесь опытом или задайте уточняющий вопрос" required></textarea><button>Опубликовать ответ</button></form>
+      <p class="topic-note">Ответы сохраняются только в текущем сеансе браузера.</p>
+    </section>
+  </div>
+  <script src="community.js"></script>
+</body>
+</html>
